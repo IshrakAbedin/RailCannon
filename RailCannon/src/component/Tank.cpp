@@ -6,16 +6,18 @@
 
 #include <GLFW/glfw3.h>
 
-Tank::Tank(bool flipped, std::string identifier)
-	:Tank::Tank(flipped, identifier, "res/textures/debug/Default.png")
+Tank::Tank(float hp, bool flipped, std::string identifier)
+	:Tank::Tank(hp, flipped, identifier, "res/textures/debug/Default.png")
 {
 }
 
-Tank::Tank(bool flipped, std::string identifier, std::string texturePath)
+Tank::Tank(float hp, bool flipped, std::string identifier, std::string texturePath)
 	:Possessable(),
+	m_Hp(hp),
 	m_Identifier(identifier), m_TexturePath(texturePath), 
 	m_Proj(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f)),
-	m_RotationRate(0.5f), m_FlipRotation(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))),
+	m_RotationRate(0.5f), m_Velocity(0.5f),
+	m_FlipRotation(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))),
 	m_Model(glm::mat4(1.0f)), m_TopLeftPoint(glm::vec2(-0.5f, 0.5f)), m_BottomRightPoint(glm::vec2(0.5f, -0.5f))
 {
 	Transform.Translation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -55,6 +57,8 @@ Tank::Tank(bool flipped, std::string identifier, std::string texturePath)
 
 	// Building Muzzle
 	m_Muzzle = std::make_unique<Muzzle>(Transform);
+	m_CannonBall = std::make_unique<CannonBall>(Transform, true, "res/textures/debug/Ball.png");
+	m_CannonBall->SetOnCollisionCallback( [&](){OnDepossess(); });
 }
 
 Tank::~Tank()
@@ -64,6 +68,7 @@ Tank::~Tank()
 void Tank::OnUpdate(float deltaTime)
 {
 	m_Muzzle->OnUpdate(deltaTime);
+	m_CannonBall->OnUpdate(deltaTime);
 	
 	if (LeftKeyDown) LeftKeyAction();
 	else if (RightKeyDown) RightKeyAction();
@@ -74,6 +79,8 @@ void Tank::OnUpdate(float deltaTime)
 
 void Tank::OnRender()
 {
+	m_CannonBall->OnRender();
+
 	m_Renderer.EnableBlend();
 
 	m_Texture->Bind();
@@ -103,18 +110,34 @@ void Tank::OnRender()
 void Tank::OnImGuiRender()
 {
 	ImGui::Begin(m_Identifier.c_str());
+	ImGui::TextColored(ImVec4(1, 0, 0, 1), std::to_string(m_Hp).c_str());
 	ImGui::SliderFloat3("Tank_Translate", glm::value_ptr(Transform.Translation), -20.0f, 20.0f);
 	ImGui::SliderFloat("Tank_Rotate", &Transform.Rotation, -180.0f, 180.0f);
 	ImGui::SliderFloat3("Tank_Scale", glm::value_ptr(Transform.Scale), 0.0f, 10.0f);
 	ImGui::SliderFloat("Angle", &m_Muzzle->Transform.Rotation, m_Muzzle->GetRotationMin(), m_Muzzle->GetRotationMax());
+	ImGui::SliderFloat("Power", &m_Velocity, 0.0f, 1.0f);
+
 	if (ImGui::Button("Raise"))
 		RaiseMuzzle();
 	ImGui::SameLine();
 	if (ImGui::Button("Lower"))
 		LowerMuzzle();
+
+	if (ImGui::Button("Fire"))
+		FireKeyAction();
+	ImGui::SameLine();
+	if (ImGui::Button("Stop"))
+		m_CannonBall->ResetProjectile();
+
 	ImGui::End();
 
 	m_Muzzle->OnImGuiRender();
+	m_CannonBall->OnImGuiRender();
+}
+
+void Tank::TakeDamage(float amount)
+{
+	m_Hp -= amount;
 }
 
 void Tank::RaiseMuzzle()
@@ -141,6 +164,7 @@ void Tank::OnPossess()
 {
 	FlushKeyPresses();
 	IsPossessed = true;
+	IsControllerOn = true;
 	if (OnPossessCallback)
 		OnPossessCallback();
 }
@@ -148,6 +172,7 @@ void Tank::OnPossess()
 void Tank::OnDepossess()
 {
 	FlushKeyPresses();
+	IsControllerOn = false;
 	IsPossessed = false;
 	if (OnDepossessCallback)
 		OnDepossessCallback();
@@ -167,6 +192,7 @@ void Tank::KeyCallbackRedirect(int key, int scancode, int action, int mods)
 			DownKeyDown = true;
 		else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
 			FireKeyAction();
+
 		else if (key == GLFW_KEY_LEFT && action == GLFW_RELEASE)
 			LeftKeyDown = false;
 		else if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE)
@@ -201,7 +227,9 @@ void Tank::DownKeyAction()
 
 void Tank::FireKeyAction()
 {
-	OnDepossess();
+	m_CannonBall->FireProjectile(m_Velocity, m_Muzzle->Transform.Rotation);
+	IsControllerOn = false;
+	//OnDepossess();
 }
 
 void Tank::FlushKeyPresses()

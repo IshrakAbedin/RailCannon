@@ -27,6 +27,7 @@
 #include "component/Tank.h"
 
 #include "debug/Grid.h"
+#include "debug/Rectangle.h"
 
 #include "test/TestClearColor.h"
 #include "test/TestTexture2D.h"
@@ -93,17 +94,47 @@ int main(void)
 		
 		Grid G;
 
-		TankA = new Tank(false, "TankA");
-		TankB = new Tank(true, "TankB");
+		Rectangle R1(false, "Rec1", false);
+		Rectangle R2(false, "Rec2", false);
+		Rectangle R3(false, "Rec3", false);
 
-		TankA->OnPossessCallback = SetTankAActive;
-		TankB->OnPossessCallback = SetTankBActive;
+		R1.Transform.Translation.y = -9.0f;
+		R1.Transform.Scale.x = 32.0f;
+
+		R2.Transform.Translation.x = 16.0f;
+		R2.Transform.Scale.y = 18.0f;
+
+		R3.Transform.Translation.x = -16.0f;
+		R3.Transform.Scale.y = 18.0f;
+
+		TankA = new Tank(1.0f, false, "TankA");
+		TankB = new Tank(1.0f, true, "TankB");
+
+		TankA->Transform.Translation.x = -12.0f;
+		TankA->Transform.Translation.y = -1.5f;
+
+		TankB->Transform.Translation.x = 12.0f;
+		TankB->Transform.Translation.y = -1.5f;
+
+		TankA->RegisterCannonBallCollidable(TankB);
+		TankA->RegisterCannonBallCollidable(&R1);
+		TankA->RegisterCannonBallCollidable(&R2);
+		TankA->RegisterCannonBallCollidable(&R3);
+
+		TankB->RegisterCannonBallCollidable(TankA);
+		TankB->RegisterCannonBallCollidable(&R1);
+		TankB->RegisterCannonBallCollidable(&R2);
+		TankB->RegisterCannonBallCollidable(&R3);
+
+		//TankA->OnPossessCallback = SetTankAActive;
+		//TankB->OnPossessCallback = SetTankBActive;
 		TankA->OnDepossessCallback = SetTankBActive;
 		TankB->OnDepossessCallback = SetTankAActive;
 		
 		TankA->IsControllerOn = true;
-		TankB->IsControllerOn = true;
+		TankB->IsControllerOn = false;
 
+		SetTankAActive();
 		TankA->OnPossess();
 
 		while (!glfwWindowShouldClose(window))
@@ -135,6 +166,18 @@ int main(void)
 			ImGui::End();
 
 			G.OnRender();
+
+			R1.OnUpdate(0.0f);
+			R1.OnRender();
+			//R1.OnImGuiRender();
+
+			R2.OnUpdate(0.0f);
+			R2.OnRender();
+			//R2.OnImGuiRender();
+
+			R3.OnUpdate(0.0f);
+			R3.OnRender();
+			//R3.OnImGuiRender();
 
 			TankA->OnUpdate(0.0f);
 			TankA->OnRender();
@@ -171,11 +214,13 @@ int main(void)
 void SetTankAActive()
 {
 	CurrentTank = TankA;
+	TankA->OnPossess();
 }
 
 void SetTankBActive()
 {
 	CurrentTank = TankB;
+	TankB->OnPossess();
 }
 
 void KeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods)

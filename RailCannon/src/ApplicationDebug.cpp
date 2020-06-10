@@ -93,7 +93,7 @@ int main(void)
 
 		Grid BackGrid;
 
-		Ball B1(false, "Ball 1", true, "res/textures/debug/Ball.png");
+		Ball B1(true, "Ball 1", true, "res/textures/debug/Ball.png");
 
 		Rectangle R1(false, "Rec1", true, "res/textures/debug/Num1.png");
 		Rectangle R2(false, "Rec2", true, "res/textures/debug/Num2.png");

@@ -60,8 +60,6 @@ void Muzzle::OnRender()
 
 	m_Texture->Bind();
 
-
-
 	glm::mat4 identity(1.0f);
 	glm::mat4 rotation = glm::rotate(identity, glm::radians(Transform.Rotation + m_ParentTransform.Rotation), glm::vec3(0, 0, 1));
 	glm::mat4 scale = glm::scale(identity, Transform.Scale * m_ParentTransform.Scale);

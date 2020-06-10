@@ -84,7 +84,10 @@
     <ClCompile Include="src\debug\Ball.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ApplicationDebug.cpp">
+    <ClCompile Include="src\component\CannonBall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1017,6 +1020,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\debug\Ball.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\CannonBall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\Damageable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
