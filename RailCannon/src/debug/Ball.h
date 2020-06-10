@@ -1,17 +1,16 @@
 #pragma once
 
-#pragma once
-
 #include <string>
 #include <memory>
 
 #include "Renderer.h"
 #include "Texture.h"
+
 #include "component/Drawable.h"
-#include "component/Possessable.h"
+#include "component/ProjectileMotion.h"
 #include "component/SimpleCollision2D.h"
 
-class Rectangle : public Drawable, public ActiveCollider
+class Ball : public Drawable, public ProjectileMotion, public ActiveCollider
 {
 public:
 	Transformation Transform;
@@ -34,10 +33,14 @@ private:
 
 	Renderer m_Renderer;
 
+	float m_Velocity;
+	float m_Angle;
+	int m_FlipMultiplier;
+
 public:
-	Rectangle(bool flipped, std::string identifier, bool collisionOn);
-	Rectangle(bool flipped, std::string identifier, bool collisionOn, std::string texturePath);
-	~Rectangle();
+	Ball(bool flipped, std::string identifier, bool collisionOn);
+	Ball(bool flipped, std::string identifier, bool collisionOn, std::string texturePath);
+	~Ball();
 
 	inline std::string GetIdentifier() const { return m_Identifier; }
 	inline void SetIdentifier(const std::string& identifier) { m_Identifier = identifier; }

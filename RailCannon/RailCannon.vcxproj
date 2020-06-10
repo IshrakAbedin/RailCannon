@@ -125,10 +125,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\ApplicationDebug.cpp" />
     <ClCompile Include="src\component\Muzzle.cpp" />
+    <ClCompile Include="src\component\ProjectileMotion.cpp" />
     <ClCompile Include="src\component\SimpleCollision2D.cpp" />
     <ClCompile Include="src\component\Tank.cpp" />
+    <ClCompile Include="src\debug\Ball.cpp" />
     <ClCompile Include="src\debug\Grid.cpp" />
     <ClCompile Include="src\debug\Rectangle.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
@@ -152,8 +154,10 @@
     <ClInclude Include="src\component\Drawable.h" />
     <ClInclude Include="src\component\Muzzle.h" />
     <ClInclude Include="src\component\Possessable.h" />
+    <ClInclude Include="src\component\ProjectileMotion.h" />
     <ClInclude Include="src\component\SimpleCollision2D.h" />
     <ClInclude Include="src\component\Tank.h" />
+    <ClInclude Include="src\debug\Ball.h" />
     <ClInclude Include="src\debug\Grid.h" />
     <ClInclude Include="src\debug\Rectangle.h" />
     <ClInclude Include="src\IndexBuffer.h" />

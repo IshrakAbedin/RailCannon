@@ -31,6 +31,7 @@
 
 #include "debug/Rectangle.h"
 #include "debug/Grid.h"
+#include "debug/Ball.h"
 
 void SetTankAActive();
 void SetTankBActive();
@@ -92,10 +93,14 @@ int main(void)
 
 		Grid BackGrid;
 
+		Ball B1(false, "Ball 1", true, "res/textures/debug/Ball.png");
+
 		Rectangle R1(false, "Rec1", true, "res/textures/debug/Num1.png");
 		Rectangle R2(false, "Rec2", true, "res/textures/debug/Num2.png");
 		Rectangle R3(false, "Rec3", true, "res/textures/debug/Num3.png");
 		Rectangle R4(false, "Rec4", false, "res/textures/debug/Num4.png");
+
+		B1.RegisterCollidable(&R1);
 
 		R1.RegisterCollidable(&R2);
 		R1.RegisterCollidable(&R3);
@@ -143,6 +148,10 @@ int main(void)
 
 			// ToDo
 			BackGrid.OnRender();
+
+			B1.OnUpdate(0.0f);
+			B1.OnRender();
+			B1.OnImGuiRender();
 
 			R1.OnUpdate(0.0f);
 			R1.OnRender();

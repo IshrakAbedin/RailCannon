@@ -1,3 +1,5 @@
+#include "Ball.h"
+
 #include "Rectangle.h"
 
 #include "VertexBufferLayout.h"
@@ -5,21 +7,25 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "imgui/imgui.h"
 
-Rectangle::Rectangle(bool flipped, std::string identifier, bool collisionOn)
-	:Rectangle::Rectangle(flipped, identifier, collisionOn, "res/textures/debug/Default.png")
+Ball::Ball(bool flipped, std::string identifier, bool collisionOn)
+	:Ball::Ball(flipped, identifier, collisionOn, "res/textures/debug/Default.png")
 {
 }
 
-Rectangle::Rectangle(bool flipped, std::string identifier, bool collisionOn, std::string texturePath)
-	:ActiveCollider(collisionOn) ,m_Identifier(identifier), m_TexturePath(texturePath),
+Ball::Ball(bool flipped, std::string identifier, bool collisionOn, std::string texturePath)
+	: ProjectileMotion(0.033f, 0.5f),
+	ActiveCollider(collisionOn), m_Identifier(identifier), m_TexturePath(texturePath),
 	m_Proj(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f)),
 	m_FlipRotation(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))),
-	m_Model(glm::mat4(1.0f)), m_TopLeftPoint(glm::vec2(-0.5f, 0.5f)), m_BottomRightPoint(glm::vec2(0.5f, -0.5f))
+	m_Model(glm::mat4(1.0f)), m_TopLeftPoint(glm::vec2(-0.5f, 0.5f)), m_BottomRightPoint(glm::vec2(0.5f, -0.5f)),
+	m_Velocity(0.0f), m_Angle(0.0f), m_FlipMultiplier(1)
 {
 	Transform.Translation = glm::vec3(0.0f, 0.0f, 0.0f);
 	Transform.Rotation = 0.0f;
 	Transform.Scale = glm::vec3(1.0f, 1.0f, 0.0f);
 	Transform.Flipped = flipped;
+	if (flipped)
+		m_FlipMultiplier = -1;
 
 	float vertices[] = {
 		// Position		Tex Coord	Index
@@ -52,15 +58,16 @@ Rectangle::Rectangle(bool flipped, std::string identifier, bool collisionOn, std
 	m_Shader->SetUniform1i("u_Texture", 0); // This value must match previous texture binding slot number
 }
 
-Rectangle::~Rectangle()
+Ball::~Ball()
 {
 }
 
-void Rectangle::OnUpdate(float deltaTime)
+void Ball::OnUpdate(float deltaTime)
 {
+	UpdateProjectile();
 }
 
-void Rectangle::OnRender()
+void Ball::OnRender()
 {
 	m_Renderer.EnableBlend();
 
@@ -69,7 +76,7 @@ void Rectangle::OnRender()
 	glm::mat4 identity(1.0f);
 	glm::mat4 rotation = glm::rotate(identity, glm::radians(Transform.Rotation), glm::vec3(0, 0, 1));
 	glm::mat4 scale = glm::scale(identity, Transform.Scale);
-	glm::mat4 translation = glm::translate(identity, Transform.Translation);
+	glm::mat4 translation = glm::translate(identity, Transform.Translation + glm::vec3(m_FlipMultiplier * XOffset, YOffset, 0.0f));
 
 	m_Model = translation * rotation * scale;
 
@@ -85,15 +92,29 @@ void Rectangle::OnRender()
 	m_Renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
 }
 
-void Rectangle::OnImGuiRender()
+void Ball::OnImGuiRender()
 {
 	std::string boundInfo = "Top: " + std::to_string(GetBoundingRectangle().TopLeftPoint.x) + ", " + std::to_string(GetBoundingRectangle().TopLeftPoint.y) +
 		" Bottom: " + std::to_string(GetBoundingRectangle().BottomRightPoint.x) + ", " + std::to_string(GetBoundingRectangle().BottomRightPoint.y);
+
+	std::string offsetInfo = "Offset: " + std::to_string(XOffset) + ", " + std::to_string(YOffset);
 
 	ImGui::Begin(m_Identifier.c_str());
 	ImGui::SliderFloat3("Rec_Translate", glm::value_ptr(Transform.Translation), -20.0f, 20.0f);
 	ImGui::SliderFloat("Rec_Rotate", &Transform.Rotation, -180.0f, 180.0f);
 	ImGui::SliderFloat3("Rec_Scale", glm::value_ptr(Transform.Scale), 0.0f, 10.0f);
+
+	ImGui::SliderFloat("Velocity", &m_Velocity, 0.0f, 1.0f);
+	ImGui::SliderFloat("Angle", &m_Angle, 0.0f, 90.0f);
+
+	ImGui::Text(offsetInfo.c_str());
+
+	if (ImGui::Button("Fire Projectile"))
+		FireProjectile(m_Velocity, m_Angle);
+
+	if (ImGui::Button("Stop Projectile"))
+		ResetProjectile();
+
 	ImGui::Text(boundInfo.c_str());
 	auto collidedObjectPtrs = CheckCollision();
 	if (!collidedObjectPtrs.empty())
@@ -102,14 +123,17 @@ void Rectangle::OnImGuiRender()
 		for (auto* objectPtr : collidedObjectPtrs)
 		{
 			Rectangle* r = dynamic_cast<Rectangle*>(objectPtr);
-			if (r)
+			if (r) 
+			{
 				ImGui::TextColored(ImVec4(0.2f, 0.3f, 0.75f, 1.0f), r->GetIdentifier().c_str());
+				ResetProjectile();
+			}
 		}
 	}
 	ImGui::End();
 }
 
-BoundingRectangle Rectangle::GetBoundingRectangle()
+BoundingRectangle Ball::GetBoundingRectangle()
 {
 	glm::vec4 tl(m_TopLeftPoint.x, m_TopLeftPoint.y, 0.0f, 1.0f);
 	glm::vec4 br(m_BottomRightPoint.x, m_BottomRightPoint.y, 0.0f, 1.0f);
