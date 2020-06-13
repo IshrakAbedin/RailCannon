@@ -4,9 +4,11 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "imgui/imgui.h"
 
+#include <ctime>
+
 Wind::Wind(const float maxVelocity)
 	:m_WindVelocity(0.0f), m_WindMaxVelocity(maxVelocity), m_TextureAlpha(0.0f),
-	m_TextureScrollAddition(0.0f), m_TextureScrollIncrement(0.0f), m_MaxTextureScrollIncrement(0.01f),
+	m_TextureScrollAddition(0.0f), m_TextureScrollIncrement(0.0f), m_MaxTextureScrollIncrement(0.006f),
 	m_Proj(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f)),
 	m_FlipRotation(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))),
 	m_Model(glm::mat4(1.0f))
@@ -43,8 +45,11 @@ Wind::Wind(const float maxVelocity)
 
 	m_Shader = std::make_unique<Shader>("res/shaders/Wind.shader");
 	m_Shader->Bind();
-	m_Texture = std::make_unique<Texture>("res/textures/wind/WindI.png");
+	m_Texture = std::make_unique<Texture>("res/textures/wind/Wind.png");
 	m_Shader->SetUniform1i("u_Texture", 0); // This value must match previous texture binding slot number
+
+	// Seed random number generator
+	srand(time(0));
 }
 
 Wind::~Wind()
@@ -53,6 +58,8 @@ Wind::~Wind()
 
 void Wind::ShuffleWindVelocity()
 {
+	float randNum = ((float)(rand() % 1000)) / 999.0f;
+	m_WindVelocity = (randNum * 2 * m_WindMaxVelocity) - m_WindMaxVelocity;
 }
 
 void Wind::OnUpdate(float deltaTime)
@@ -61,7 +68,7 @@ void Wind::OnUpdate(float deltaTime)
 	float absRatio = glm::abs(ratio);
 
 	m_TextureScrollIncrement = ratio * m_MaxTextureScrollIncrement;
-	m_TextureAlpha = absRatio == 0.0f ? 0.0f : (0.2f + absRatio * 0.8f);
+	m_TextureAlpha = absRatio == 0.0f ? 0.0f : (0.2f + absRatio * 0.35f);
 	m_TextureScrollAddition -= m_TextureScrollIncrement;
 
 	// Loop correction
@@ -101,8 +108,20 @@ void Wind::OnRender()
 
 void Wind::OnImGuiRender()
 {
+	std::string windVelocityText;
+	if (m_WindVelocity == 0.0f)
+		windVelocityText = "Wind Speed: " + std::to_string(m_WindVelocity);
+	else if (m_WindVelocity < 0.0f)
+		windVelocityText = "Wind Speed: " + std::to_string(glm::abs(m_WindVelocity)) + " L";
+	else
+		windVelocityText = "Wind Speed: " + std::to_string(glm::abs(m_WindVelocity)) + " R";
+	
 	ImGui::Begin("Wind Gauge");
-	ImGui::Text("Wind Speed: %.2f", m_WindVelocity);
-	ImGui::SliderFloat("Velocity", &m_WindVelocity, -m_WindMaxVelocity, m_WindMaxVelocity);
+	ImGui::Text(windVelocityText.c_str());
+
+	/*ImGui::SliderFloat("Velocity", &m_WindVelocity, -m_WindMaxVelocity, m_WindMaxVelocity);
+	if (ImGui::Button("Shuffle"))
+		ShuffleWindVelocity();*/
+
 	ImGui::End();
 }

@@ -12,8 +12,13 @@ Tank::Tank(float hp, bool flipped, std::string identifier)
 }
 
 Tank::Tank(float hp, bool flipped, std::string identifier, std::string textureDirectory)
-	:Possessable(),
-	m_Hp(hp), m_LeftBoundary(-16.0f), m_RightBoundary(16.0f), 
+	:Tank::Tank(hp, flipped, identifier, textureDirectory, nullptr)
+{
+}
+
+Tank::Tank(float hp, bool flipped, std::string identifier, std::string textureDirectory, Wind* wind)
+	: Possessable(),
+	m_Hp(hp), m_LeftBoundary(-16.0f), m_RightBoundary(16.0f), m_Wind(wind),
 	m_MovementRate(0.02f), m_VelocityMin(0.3f), m_VelocityMax(1.0f), m_VelocityDelta(0.01f),
 	m_Identifier(identifier), m_TextureDirectory(textureDirectory), 
 	m_Proj(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f)),
@@ -286,7 +291,11 @@ void Tank::VelocityDecrementKeyAction()
 
 void Tank::FireKeyAction()
 {
-	m_CannonBall->FireProjectile(m_Velocity, m_Muzzle->Transform.Rotation);
+	if(m_Wind)
+		m_CannonBall->FireProjectile(m_Velocity + m_Wind->GetWindVelocity(Transform.Flipped), m_Muzzle->Transform.Rotation);
+	else
+		m_CannonBall->FireProjectile(m_Velocity, m_Muzzle->Transform.Rotation);
+	
 	IsControllerOn = false;
 	//OnDepossess();
 }

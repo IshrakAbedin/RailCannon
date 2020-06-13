@@ -3,12 +3,13 @@
 #include <string>
 
 #include "Drawable.h"
-#include "Muzzle.h"
-#include "CannonBall.h"
-#include "Smoke.h"
 #include "Possessable.h"
 #include "SimpleCollision2D.h"
 #include "Damageable.h"
+#include "Muzzle.h"
+#include "CannonBall.h"
+#include "Smoke.h"
+#include "Wind.h"
 
 class Tank : public Drawable, public Possessable, public PassiveCollider, public Damageable
 {
@@ -34,6 +35,8 @@ private:
 	std::unique_ptr<CannonBall> m_CannonBall;
 	std::unique_ptr<Smoke> m_Smoke;
 
+	Wind* m_Wind;
+
 	std::unique_ptr<VertexArray> m_VAO;
 	std::unique_ptr<VertexBuffer> m_VertexBuffer;
 	std::unique_ptr<IndexBuffer> m_IndexBuffer;
@@ -52,6 +55,7 @@ private:
 public:
 	Tank(float hp, bool flipped, std::string identifier);
 	Tank(float hp, bool flipped, std::string identifier, std::string textureDirectory);
+	Tank(float hp, bool flipped, std::string identifier, std::string textureDirectory, Wind* wind);
 	~Tank();
 
 	inline float GetHp() const { return m_Hp; }
@@ -68,6 +72,8 @@ public:
 
 	inline std::string GetIdentifier() const { return m_Identifier; }
 	inline void SetIdentifier(const std::string& identifier) { m_Identifier = identifier; }
+
+	inline void SetWind(Wind* wind) { m_Wind = wind; }
 
 	void OnUpdate(float deltaTime) override;
 	void OnRender() override;

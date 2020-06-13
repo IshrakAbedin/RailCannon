@@ -40,6 +40,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 Tank* CurrentTank;
 Tank* TankA;
 Tank* TankB;
+Wind* WindGen;
 
 int main(void)
 {
@@ -94,7 +95,6 @@ int main(void)
 		Renderer renderer;
 		
 		Background bg;
-		Wind w(0.2f);
 
 		Rectangle R1(false, "Rec1", false, "res/textures/debug/Black.png");
 		Rectangle R2(false, "Rec2", false, "res/textures/debug/Black.png");
@@ -112,8 +112,10 @@ int main(void)
 		R3.Transform.Scale.x = 2.0f;
 		R3.Transform.Scale.y = 36.0f;
 
-		TankA = new Tank(1.0f, false, "Player 1");
-		TankB = new Tank(1.0f, true, "Player 2");
+		WindGen = new Wind(0.2f);
+
+		TankA = new Tank(1.0f, false, "Player 1", "res/textures/cannon/", WindGen);
+		TankB = new Tank(1.0f, true, "Player 2", "res/textures/cannon/", WindGen);
 
 		TankA->Transform.Scale = glm::vec3(2.0f);
 		TankB->Transform.Scale = glm::vec3(2.0f);
@@ -182,9 +184,9 @@ int main(void)
 			bg.OnUpdate(0.0f);
 			bg.OnRender();
 
-			w.OnUpdate(0.0f);
-			w.OnRender();
-			w.OnImGuiRender();
+			WindGen->OnUpdate(0.0f);
+			WindGen->OnRender();
+			WindGen->OnImGuiRender();
 
 			R1.OnUpdate(0.0f);
 			R1.OnRender();
@@ -216,6 +218,7 @@ int main(void)
 
 		delete TankA;
 		delete TankB;
+		delete WindGen;
 
 		//delete currentTest; // Delete the current test on window close
 		//if (currentTest != testMenu) // If we closed the window which inside any test, testMenu is still left, so we should clear that too
@@ -232,12 +235,14 @@ int main(void)
 
 void SetTankAActive()
 {
+	WindGen->ShuffleWindVelocity();
 	CurrentTank = TankA;
 	TankA->OnPossess();
 }
 
 void SetTankBActive()
 {
+	WindGen->ShuffleWindVelocity();
 	CurrentTank = TankB;
 	TankB->OnPossess();
 }
