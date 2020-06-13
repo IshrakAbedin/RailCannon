@@ -4,11 +4,11 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "imgui/imgui.h"
 
-Muzzle::Muzzle(Transformation& parentTransform)
+Muzzle::Muzzle(Transformation& parentTransform, std::string texturePath)
 	: m_ParentTransform(parentTransform),
 	m_Proj(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f)),
 	m_FlipRotation(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))),
-	m_RotationMin(0.0f), m_RotationMax(90.0f)
+	m_RotationMin(0.0f), m_RotationMax(75.0f), m_TexturePath(texturePath)
 {
 	Transform.Translation = glm::vec3(0.0f, 0.0f, 0.0f);
 	Transform.Rotation = 0.0f;
@@ -42,7 +42,7 @@ Muzzle::Muzzle(Transformation& parentTransform)
 
 	m_Shader = std::make_unique<Shader>("res/shaders/Tank.shader");
 	m_Shader->Bind();
-	m_Texture = std::make_unique<Texture>("res/textures/debug/Axes.png");
+	m_Texture = std::make_unique<Texture>(m_TexturePath);
 	m_Shader->SetUniform1i("u_Texture", 0); // This value must match previous texture binding slot number
 }
 

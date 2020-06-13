@@ -90,6 +90,12 @@
     <ClCompile Include="src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\component\Background.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\Smoke.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\test\Test.h">
@@ -1028,6 +1034,12 @@
     <ClInclude Include="src\component\Damageable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\component\Background.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\component\Smoke.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\vendor\glm\detail\func_common.inl">
@@ -1440,5 +1452,6 @@
     </None>
     <None Include="res\shaders\Basic.shader" />
     <None Include="res\shaders\Tank.shader" />
+    <None Include="res\shaders\Smoke.shader" />
   </ItemGroup>
 </Project>

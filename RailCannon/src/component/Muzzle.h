@@ -13,6 +13,7 @@ public:
 	Transformation Transform;
 private:
 	Transformation& m_ParentTransform;
+	std::string m_TexturePath;
 
 	std::unique_ptr<VertexArray> m_VAO;
 	std::unique_ptr<VertexBuffer> m_VertexBuffer;
@@ -28,7 +29,7 @@ private:
 	Renderer m_Renderer;
 
 public:
-	Muzzle(Transformation& parentTransform);
+	Muzzle(Transformation& parentTransform, std::string texturePath);
 	~Muzzle();
 
 	void OnUpdate(float deltaTime) override;

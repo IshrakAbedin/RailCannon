@@ -126,10 +126,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\component\Background.cpp" />
     <ClCompile Include="src\component\CannonBall.cpp" />
     <ClCompile Include="src\component\Muzzle.cpp" />
     <ClCompile Include="src\component\ProjectileMotion.cpp" />
     <ClCompile Include="src\component\SimpleCollision2D.cpp" />
+    <ClCompile Include="src\component\Smoke.cpp" />
     <ClCompile Include="src\component\Tank.cpp" />
     <ClCompile Include="src\debug\Ball.cpp" />
     <ClCompile Include="src\debug\Grid.cpp" />
@@ -152,6 +154,7 @@
     <ClCompile Include="src\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\component\Background.h" />
     <ClInclude Include="src\component\CannonBall.h" />
     <ClInclude Include="src\component\Damageable.h" />
     <ClInclude Include="src\component\Drawable.h" />
@@ -159,6 +162,7 @@
     <ClInclude Include="src\component\Possessable.h" />
     <ClInclude Include="src\component\ProjectileMotion.h" />
     <ClInclude Include="src\component\SimpleCollision2D.h" />
+    <ClInclude Include="src\component\Smoke.h" />
     <ClInclude Include="src\component\Tank.h" />
     <ClInclude Include="src\debug\Ball.h" />
     <ClInclude Include="src\debug\Grid.h" />
@@ -467,6 +471,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Basic.shader" />
+    <None Include="res\shaders\Smoke.shader" />
     <None Include="res\shaders\Tank.shader" />
     <None Include="src\vendor\glm\detail\func_common.inl" />
     <None Include="src\vendor\glm\detail\func_common_simd.inl" />

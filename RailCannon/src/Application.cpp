@@ -25,8 +25,8 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "component/Tank.h"
+#include "component/Background.h"
 
-#include "debug/Grid.h"
 #include "debug/Rectangle.h"
 
 #include "test/TestClearColor.h"
@@ -92,29 +92,41 @@ int main(void)
 
 		Renderer renderer;
 		
-		Grid G;
+		Background bg;
 
-		Rectangle R1(false, "Rec1", false);
-		Rectangle R2(false, "Rec2", false);
-		Rectangle R3(false, "Rec3", false);
+		Rectangle R1(false, "Rec1", false, "res/textures/debug/Black.png");
+		Rectangle R2(false, "Rec2", false, "res/textures/debug/Black.png");
+		Rectangle R3(false, "Rec3", false, "res/textures/debug/Black.png");
 
 		R1.Transform.Translation.y = -9.0f;
 		R1.Transform.Scale.x = 32.0f;
+		R1.Transform.Scale.y = 2.0f;
 
 		R2.Transform.Translation.x = 16.0f;
-		R2.Transform.Scale.y = 18.0f;
+		R2.Transform.Scale.x = 2.0f;
+		R2.Transform.Scale.y = 36.0f;
 
 		R3.Transform.Translation.x = -16.0f;
-		R3.Transform.Scale.y = 18.0f;
+		R3.Transform.Scale.x = 2.0f;
+		R3.Transform.Scale.y = 36.0f;
 
-		TankA = new Tank(1.0f, false, "TankA");
-		TankB = new Tank(1.0f, true, "TankB");
+		TankA = new Tank(1.0f, false, "Player 1");
+		TankB = new Tank(1.0f, true, "Player 2");
+
+		TankA->Transform.Scale = glm::vec3(2.0f);
+		TankB->Transform.Scale = glm::vec3(2.0f);
 
 		TankA->Transform.Translation.x = -12.0f;
-		TankA->Transform.Translation.y = -1.5f;
+		TankA->Transform.Translation.y = -3.4f;
 
 		TankB->Transform.Translation.x = 12.0f;
-		TankB->Transform.Translation.y = -1.5f;
+		TankB->Transform.Translation.y = -3.4f;
+
+		TankA->SetLeftBoundary(-13.76f);
+		TankA->SetRightBoundary(-5.98f);
+
+		TankB->SetLeftBoundary(5.98f);
+		TankB->SetRightBoundary(13.76f);
 
 		TankA->RegisterCannonBallCollidable(TankB);
 		TankA->RegisterCannonBallCollidable(&R1);
@@ -165,7 +177,8 @@ int main(void)
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 
-			G.OnRender();
+			bg.OnUpdate(0.0f);
+			bg.OnRender();
 
 			R1.OnUpdate(0.0f);
 			R1.OnRender();

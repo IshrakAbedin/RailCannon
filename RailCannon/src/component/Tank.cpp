@@ -7,14 +7,15 @@
 #include <GLFW/glfw3.h>
 
 Tank::Tank(float hp, bool flipped, std::string identifier)
-	:Tank::Tank(hp, flipped, identifier, "res/textures/debug/Default.png")
+	:Tank::Tank(hp, flipped, identifier, "res/textures/cannon/")
 {
 }
 
-Tank::Tank(float hp, bool flipped, std::string identifier, std::string texturePath)
+Tank::Tank(float hp, bool flipped, std::string identifier, std::string textureDirectory)
 	:Possessable(),
-	m_Hp(hp),
-	m_Identifier(identifier), m_TexturePath(texturePath), 
+	m_Hp(hp), m_LeftBoundary(-16.0f), m_RightBoundary(16.0f), 
+	m_MovementRate(0.02f), m_VelocityMin(0.3f), m_VelocityMax(1.0f), m_VelocityDelta(0.01f),
+	m_Identifier(identifier), m_TextureDirectory(textureDirectory), 
 	m_Proj(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f)),
 	m_RotationRate(0.5f), m_Velocity(0.5f),
 	m_FlipRotation(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))),
@@ -52,13 +53,18 @@ Tank::Tank(float hp, bool flipped, std::string identifier, std::string texturePa
 
 	m_Shader = std::make_unique<Shader>("res/shaders/Tank.shader");
 	m_Shader->Bind();
-	m_Texture = std::make_unique<Texture>(m_TexturePath);
+	m_Texture = std::make_unique<Texture>(m_TextureDirectory + "CannonBody.png");
 	m_Shader->SetUniform1i("u_Texture", 0); // This value must match previous texture binding slot number
 
 	// Building Muzzle
-	m_Muzzle = std::make_unique<Muzzle>(Transform);
-	m_CannonBall = std::make_unique<CannonBall>(Transform, true, "res/textures/debug/Ball.png");
+	m_Muzzle = std::make_unique<Muzzle>(Transform, m_TextureDirectory + "CannonMuzzle.png");
+
+	m_CannonBall = std::make_unique<CannonBall>(Transform, true, m_TextureDirectory + "ball/Ball1.png");
+	m_CannonBall->Transform.Scale = glm::vec3(0.15f);
 	m_CannonBall->SetOnCollisionCallback( [&](){OnDepossess(); });
+
+	m_Smoke = std::make_unique<Smoke>(m_Hp, Transform, m_TextureDirectory + "smoke/");
+	m_Smoke->Transform.Translation.y = 0.708f;
 }
 
 Tank::~Tank()
@@ -67,6 +73,7 @@ Tank::~Tank()
 
 void Tank::OnUpdate(float deltaTime)
 {
+	m_Smoke->OnUpdate(deltaTime);
 	m_Muzzle->OnUpdate(deltaTime);
 	m_CannonBall->OnUpdate(deltaTime);
 	
@@ -75,11 +82,15 @@ void Tank::OnUpdate(float deltaTime)
 	else if (UpKeyDown) UpKeyAction();
 	else if (DownKeyDown) DownKeyAction();
 	else if (FireKeyDown) FireKeyAction();
+	else if (VelocityIncrementKeyDown) VelocityIncrementKeyAction();
+	else if (VelocityDecrementKeyDown) VelocityDecrementKeyAction();
 }
 
 void Tank::OnRender()
 {
+	//m_Smoke->OnRender();
 	m_CannonBall->OnRender();
+	m_Muzzle->OnRender();
 
 	m_Renderer.EnableBlend();
 
@@ -104,40 +115,53 @@ void Tank::OnRender()
 
 	m_Renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
 
-	m_Muzzle->OnRender();
+	// Render Smoke on top
+	m_Smoke->OnRender();
 }
 
 void Tank::OnImGuiRender()
 {
-	ImGui::Begin(m_Identifier.c_str());
-	ImGui::TextColored(ImVec4(1, 0, 0, 1), std::to_string(m_Hp).c_str());
-	ImGui::SliderFloat3("Tank_Translate", glm::value_ptr(Transform.Translation), -20.0f, 20.0f);
-	ImGui::SliderFloat("Tank_Rotate", &Transform.Rotation, -180.0f, 180.0f);
-	ImGui::SliderFloat3("Tank_Scale", glm::value_ptr(Transform.Scale), 0.0f, 10.0f);
-	ImGui::SliderFloat("Angle", &m_Muzzle->Transform.Rotation, m_Muzzle->GetRotationMin(), m_Muzzle->GetRotationMax());
-	ImGui::SliderFloat("Power", &m_Velocity, 0.0f, 1.0f);
-
-	if (ImGui::Button("Raise"))
-		RaiseMuzzle();
-	ImGui::SameLine();
-	if (ImGui::Button("Lower"))
-		LowerMuzzle();
-
-	if (ImGui::Button("Fire"))
-		FireKeyAction();
-	ImGui::SameLine();
-	if (ImGui::Button("Stop"))
-		m_CannonBall->ResetProjectile();
-
-	ImGui::End();
-
+	m_Smoke->OnImGuiRender();
 	m_Muzzle->OnImGuiRender();
 	m_CannonBall->OnImGuiRender();
+
+
+
+	ImGui::Begin(m_Identifier.c_str());
+	//ImGui::SliderFloat3("Smoke_Translation", glm::value_ptr(m_Smoke->Transform.Translation), -10.0f, 10.f);
+	ImGui::TextColored(ImVec4(1 - m_Hp, 0, m_Hp, 1), "Health:");
+	//ImGui::SameLine();
+	ImGui::ProgressBar(m_Hp);
+	//ImGui::SliderFloat3("Tank_Translate", glm::value_ptr(Transform.Translation), -20.0f, 20.0f);
+	//ImGui::SliderFloat("Tank_Rotate", &Transform.Rotation, -180.0f, 180.0f);
+	//ImGui::SliderFloat3("Tank_Scale", glm::value_ptr(Transform.Scale), 0.0f, 10.0f);
+	if(IsControllerOn)
+	{
+		ImGui::SliderFloat("Angle", &m_Muzzle->Transform.Rotation, m_Muzzle->GetRotationMin(), m_Muzzle->GetRotationMax());
+		ImGui::SliderFloat("Power", &m_Velocity, m_VelocityMin, m_VelocityMax);
+
+		if (ImGui::Button("Raise"))
+			RaiseMuzzle();
+		ImGui::SameLine();
+		if (ImGui::Button("Lower"))
+			LowerMuzzle();
+
+		if (ImGui::Button("Fire"))
+			FireKeyAction();
+	}
+
+	/*ImGui::SameLine();
+	if (ImGui::Button("Stop"))
+		m_CannonBall->ResetProjectile();*/
+
+	ImGui::End();
 }
 
 void Tank::TakeDamage(float amount)
 {
 	m_Hp -= amount;
+	if (m_Hp < 0.0f)
+		m_Hp = 0.0f;
 }
 
 void Tank::RaiseMuzzle()
@@ -148,6 +172,20 @@ void Tank::RaiseMuzzle()
 void Tank::LowerMuzzle()
 {
 	m_Muzzle->DecrementRotation(m_RotationRate);
+}
+
+void Tank::IncrementVelocity()
+{
+	m_Velocity += m_VelocityDelta;
+	if (m_Velocity > m_VelocityMax)
+		m_Velocity = m_VelocityMax;
+}
+
+void Tank::DecrementVelocity()
+{
+	m_Velocity -= m_VelocityDelta;
+	if (m_Velocity < m_VelocityMin)
+		m_Velocity = m_VelocityMin;
 }
 
 BoundingRectangle Tank::GetBoundingRectangle()
@@ -182,37 +220,48 @@ void Tank::KeyCallbackRedirect(int key, int scancode, int action, int mods)
 {
 	if (IsControllerOn) 
 	{
-		if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
+		if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_A)  && action == GLFW_PRESS)
 			LeftKeyDown = true;
-		else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+		else if ((key == GLFW_KEY_RIGHT || key == GLFW_KEY_D) && action == GLFW_PRESS)
 			RightKeyDown = true;
-		else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+		else if ((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_PRESS)
 			UpKeyDown = true;
-		else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+		else if ((key == GLFW_KEY_DOWN || key == GLFW_KEY_S) && action == GLFW_PRESS)
 			DownKeyDown = true;
-		else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+		else if ((key == GLFW_KEY_E || key == GLFW_KEY_KP_5) && action == GLFW_PRESS)
+			VelocityIncrementKeyDown = true;
+		else if ((key == GLFW_KEY_Q || key == GLFW_KEY_KP_4) && action == GLFW_PRESS)
+			VelocityDecrementKeyDown = true;
+
+		else if ((key == GLFW_KEY_SPACE || key == GLFW_KEY_1 || key == GLFW_KEY_KP_1) && action == GLFW_PRESS)
 			FireKeyAction();
 
-		else if (key == GLFW_KEY_LEFT && action == GLFW_RELEASE)
+		else if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_A) && action == GLFW_RELEASE)
 			LeftKeyDown = false;
-		else if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE)
+		else if ((key == GLFW_KEY_RIGHT || key == GLFW_KEY_D) && action == GLFW_RELEASE)
 			RightKeyDown = false;
-		else if (key == GLFW_KEY_UP && action == GLFW_RELEASE)
+		else if ((key == GLFW_KEY_UP || key == GLFW_KEY_W) && action == GLFW_RELEASE)
 			UpKeyDown = false;
-		else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE)
+		else if ((key == GLFW_KEY_DOWN || key == GLFW_KEY_S) && action == GLFW_RELEASE)
 			DownKeyDown = false;
+		else if ((key == GLFW_KEY_E || key == GLFW_KEY_KP_5) && action == GLFW_RELEASE)
+			VelocityIncrementKeyDown = false;
+		else if ((key == GLFW_KEY_Q || key == GLFW_KEY_KP_4) && action == GLFW_RELEASE)
+			VelocityDecrementKeyDown = false;
 
 	}	
 }
 
 void Tank::LeftKeyAction()
 {
-	Transform.Translation.x -= 0.02f;
+	Transform.Translation.x -= m_MovementRate;
+	BoundTranslation();
 }
 
 void Tank::RightKeyAction()
 {
-	Transform.Translation.x += 0.02f;
+	Transform.Translation.x += m_MovementRate;
+	BoundTranslation();
 }
 
 void Tank::UpKeyAction()
@@ -223,6 +272,16 @@ void Tank::UpKeyAction()
 void Tank::DownKeyAction()
 {
 	LowerMuzzle();
+}
+
+void Tank::VelocityIncrementKeyAction()
+{
+	IncrementVelocity();
+}
+
+void Tank::VelocityDecrementKeyAction()
+{
+	DecrementVelocity();
 }
 
 void Tank::FireKeyAction()
@@ -238,7 +297,17 @@ void Tank::FlushKeyPresses()
 	RightKeyDown = false;
 	UpKeyDown = false;
 	DownKeyDown = false;
+	VelocityIncrementKeyDown = false;
+	VelocityDecrementKeyDown = false;
 	FireKeyDown = false;
+}
+
+void Tank::BoundTranslation()
+{
+	if (Transform.Translation.x < m_LeftBoundary)
+		Transform.Translation.x = m_LeftBoundary;
+	else if (Transform.Translation.x > m_RightBoundary)
+		Transform.Translation.x = m_RightBoundary;
 }
 
 
