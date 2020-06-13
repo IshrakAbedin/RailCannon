@@ -133,6 +133,7 @@
     <ClCompile Include="src\component\SimpleCollision2D.cpp" />
     <ClCompile Include="src\component\Smoke.cpp" />
     <ClCompile Include="src\component\Tank.cpp" />
+    <ClCompile Include="src\component\Wind.cpp" />
     <ClCompile Include="src\debug\Ball.cpp" />
     <ClCompile Include="src\debug\Grid.cpp" />
     <ClCompile Include="src\debug\Rectangle.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="src\component\SimpleCollision2D.h" />
     <ClInclude Include="src\component\Smoke.h" />
     <ClInclude Include="src\component\Tank.h" />
+    <ClInclude Include="src\component\Wind.h" />
     <ClInclude Include="src\debug\Ball.h" />
     <ClInclude Include="src\debug\Grid.h" />
     <ClInclude Include="src\debug\Rectangle.h" />
@@ -473,6 +475,7 @@
     <None Include="res\shaders\Basic.shader" />
     <None Include="res\shaders\Smoke.shader" />
     <None Include="res\shaders\Tank.shader" />
+    <None Include="res\shaders\Wind.shader" />
     <None Include="src\vendor\glm\detail\func_common.inl" />
     <None Include="src\vendor\glm\detail\func_common_simd.inl" />
     <None Include="src\vendor\glm\detail\func_exponential.inl" />

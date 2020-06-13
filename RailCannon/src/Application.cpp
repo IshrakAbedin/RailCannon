@@ -26,6 +26,7 @@
 
 #include "component/Tank.h"
 #include "component/Background.h"
+#include "component/Wind.h"
 
 #include "debug/Rectangle.h"
 
@@ -93,6 +94,7 @@ int main(void)
 		Renderer renderer;
 		
 		Background bg;
+		Wind w(0.2f);
 
 		Rectangle R1(false, "Rec1", false, "res/textures/debug/Black.png");
 		Rectangle R2(false, "Rec2", false, "res/textures/debug/Black.png");
@@ -179,6 +181,10 @@ int main(void)
 
 			bg.OnUpdate(0.0f);
 			bg.OnRender();
+
+			w.OnUpdate(0.0f);
+			w.OnRender();
+			w.OnImGuiRender();
 
 			R1.OnUpdate(0.0f);
 			R1.OnRender();
