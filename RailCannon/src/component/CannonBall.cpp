@@ -56,6 +56,8 @@ CannonBall::CannonBall(Transformation& parentTransform, bool collisionOn, std::s
 	m_Shader->Bind();
 	m_Texture = std::make_unique<Texture>(m_TexturePath);
 	m_Shader->SetUniform1i("u_Texture", 0); // This value must match previous texture binding slot number
+
+	m_Exploder = std::make_unique<Exploder>();
 }
 
 CannonBall::~CannonBall()
@@ -66,6 +68,7 @@ void CannonBall::OnUpdate(float deltaTime)
 {
 	// Projectile Offset update
 	UpdateProjectile();
+	m_Exploder->OnUpdate(deltaTime);
 
 	// Collision Update
 	if (GetIsOnMotion())
@@ -82,6 +85,7 @@ void CannonBall::OnUpdate(float deltaTime)
 				}
 			}
 			ResetProjectile();
+			m_Exploder->ExplodeAtFor(m_Model, 12);
 			if (m_OnCollisionCallback)
 				m_OnCollisionCallback();
 		}
@@ -90,6 +94,8 @@ void CannonBall::OnUpdate(float deltaTime)
 
 void CannonBall::OnRender()
 {
+	m_Exploder->OnRender();
+
 	m_Renderer.EnableBlend();
 
 	m_Texture->Bind();

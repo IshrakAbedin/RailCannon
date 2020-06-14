@@ -128,6 +128,7 @@
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\component\Background.cpp" />
     <ClCompile Include="src\component\CannonBall.cpp" />
+    <ClCompile Include="src\component\Exploder.cpp" />
     <ClCompile Include="src\component\Muzzle.cpp" />
     <ClCompile Include="src\component\ProjectileMotion.cpp" />
     <ClCompile Include="src\component\SimpleCollision2D.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="src\component\CannonBall.h" />
     <ClInclude Include="src\component\Damageable.h" />
     <ClInclude Include="src\component\Drawable.h" />
+    <ClInclude Include="src\component\Exploder.h" />
     <ClInclude Include="src\component\Muzzle.h" />
     <ClInclude Include="src\component\Possessable.h" />
     <ClInclude Include="src\component\ProjectileMotion.h" />
@@ -473,6 +475,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Basic.shader" />
+    <None Include="res\shaders\Explosion.shader" />
     <None Include="res\shaders\Smoke.shader" />
     <None Include="res\shaders\Tank.shader" />
     <None Include="res\shaders\Wind.shader" />

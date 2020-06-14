@@ -7,9 +7,11 @@
 #include "Renderer.h"
 #include "Texture.h"
 
-#include "component/Drawable.h"
-#include "component/ProjectileMotion.h"
-#include "component/SimpleCollision2D.h"
+#include "Drawable.h"
+#include "ProjectileMotion.h"
+#include "SimpleCollision2D.h"
+
+#include "Exploder.h"
 
 class CannonBall : public Drawable, public ProjectileMotion, public ActiveCollider
 {
@@ -21,6 +23,8 @@ private:
 
 	glm::vec2 m_TopLeftPoint;
 	glm::vec2 m_BottomRightPoint;
+
+	std::unique_ptr<Exploder> m_Exploder;
 
 	std::unique_ptr<VertexArray> m_VAO;
 	std::unique_ptr<VertexBuffer> m_VertexBuffer;
