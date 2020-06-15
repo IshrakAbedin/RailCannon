@@ -25,6 +25,9 @@ private:
 	float m_VelocityMax;
 	float m_VelocityDelta;
 
+	unsigned int m_MediumBallCount;
+	unsigned int m_HeavyBallCount;
+
 	std::string m_Identifier;
 	std::string m_TextureDirectory;
 
@@ -70,6 +73,12 @@ public:
 	inline float GetMovementRate() const { return m_MovementRate; }
 	inline void SetMovementRate(const float movementRate) { m_MovementRate = movementRate; }
 
+	inline unsigned int GetMediumBallCount() const { return m_MediumBallCount; }
+	inline void SetMediumBallCount(const unsigned int mediumBallCount) { m_MediumBallCount = mediumBallCount; }
+
+	inline unsigned int GetHeavyBallCount() const { return m_HeavyBallCount; }
+	inline void SetHeavyBallCount(const unsigned int heavyBallCount) { m_HeavyBallCount = heavyBallCount; }
+
 	inline std::string GetIdentifier() const { return m_Identifier; }
 	inline void SetIdentifier(const std::string& identifier) { m_Identifier = identifier; }
 
@@ -104,7 +113,6 @@ private:
 	bool DownKeyDown = false;
 	bool VelocityIncrementKeyDown = false;
 	bool VelocityDecrementKeyDown = false;
-	bool FireKeyDown = false;
 
 	void LeftKeyAction();
 	void RightKeyAction();
@@ -112,9 +120,13 @@ private:
 	void DownKeyAction();
 	void VelocityIncrementKeyAction();
 	void VelocityDecrementKeyAction();
-	void FireKeyAction();
 
 	void FlushKeyPresses();
+
+	void FireCannonBall(CannonBallType cannonBallType);
+	void FireLightBall();
+	void FireMediumBall();
+	void FireHeavyBall();
 
 	void BoundTranslation();
 };

@@ -20,6 +20,7 @@ Tank::Tank(float hp, bool flipped, std::string identifier, std::string textureDi
 	: Possessable(),
 	m_Hp(hp), m_LeftBoundary(-16.0f), m_RightBoundary(16.0f), m_Wind(wind),
 	m_MovementRate(0.02f), m_VelocityMin(0.3f), m_VelocityMax(1.0f), m_VelocityDelta(0.01f),
+	m_MediumBallCount(2), m_HeavyBallCount(1),
 	m_Identifier(identifier), m_TextureDirectory(textureDirectory), 
 	m_Proj(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f)),
 	m_RotationRate(0.5f), m_Velocity(0.5f),
@@ -64,7 +65,7 @@ Tank::Tank(float hp, bool flipped, std::string identifier, std::string textureDi
 	// Building Muzzle
 	m_Muzzle = std::make_unique<Muzzle>(Transform, m_TextureDirectory + "CannonMuzzle.png");
 
-	m_CannonBall = std::make_unique<CannonBall>(Transform, true, m_TextureDirectory + "ball/Ball1.png");
+	m_CannonBall = std::make_unique<CannonBall>(Transform, true, m_TextureDirectory + "ball/");
 	m_CannonBall->Transform.Scale = glm::vec3(0.15f);
 	m_CannonBall->SetOnCollisionCallback( [&](){OnDepossess(); });
 
@@ -86,7 +87,6 @@ void Tank::OnUpdate(float deltaTime)
 	else if (RightKeyDown) RightKeyAction();
 	else if (UpKeyDown) UpKeyAction();
 	else if (DownKeyDown) DownKeyAction();
-	else if (FireKeyDown) FireKeyAction();
 	else if (VelocityIncrementKeyDown) VelocityIncrementKeyAction();
 	else if (VelocityDecrementKeyDown) VelocityDecrementKeyAction();
 }
@@ -140,19 +140,37 @@ void Tank::OnImGuiRender()
 	//ImGui::SliderFloat3("Tank_Translate", glm::value_ptr(Transform.Translation), -20.0f, 20.0f);
 	//ImGui::SliderFloat("Tank_Rotate", &Transform.Rotation, -180.0f, 180.0f);
 	//ImGui::SliderFloat3("Tank_Scale", glm::value_ptr(Transform.Scale), 0.0f, 10.0f);
+	ImGui::Text("Ammo: AP[inf] HE[%d] APHE[%d]", m_MediumBallCount, m_HeavyBallCount);
+
 	if(IsControllerOn)
 	{
 		ImGui::SliderFloat("Angle", &m_Muzzle->Transform.Rotation, m_Muzzle->GetRotationMin(), m_Muzzle->GetRotationMax());
 		ImGui::SliderFloat("Power", &m_Velocity, m_VelocityMin, m_VelocityMax);
 
-		if (ImGui::Button("Raise"))
+		/*if (ImGui::Button("Raise"))
 			RaiseMuzzle();
 		ImGui::SameLine();
 		if (ImGui::Button("Lower"))
-			LowerMuzzle();
+			LowerMuzzle();*/
 
-		if (ImGui::Button("Fire"))
-			FireKeyAction();
+		ImGui::Text("Fire:");
+		ImGui::SameLine();
+		if (ImGui::Button("AP"))
+			FireLightBall();
+
+		if (m_MediumBallCount > 0u)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button("HE"))
+				FireMediumBall();
+		}
+
+		if (m_HeavyBallCount > 0u)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button("APHE"))
+				FireHeavyBall();
+		}
 	}
 
 	/*ImGui::SameLine();
@@ -239,7 +257,11 @@ void Tank::KeyCallbackRedirect(int key, int scancode, int action, int mods)
 			VelocityDecrementKeyDown = true;
 
 		else if ((key == GLFW_KEY_SPACE || key == GLFW_KEY_1 || key == GLFW_KEY_KP_1) && action == GLFW_PRESS)
-			FireKeyAction();
+			FireLightBall();
+		else if ((key == GLFW_KEY_2 || key == GLFW_KEY_KP_2) && action == GLFW_PRESS)
+			FireMediumBall();
+		else if ((key == GLFW_KEY_3 || key == GLFW_KEY_KP_3) && action == GLFW_PRESS)
+			FireHeavyBall();
 
 		else if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_A) && action == GLFW_RELEASE)
 			LeftKeyDown = false;
@@ -289,8 +311,20 @@ void Tank::VelocityDecrementKeyAction()
 	DecrementVelocity();
 }
 
-void Tank::FireKeyAction()
+void Tank::FlushKeyPresses()
 {
+	LeftKeyDown = false;
+	RightKeyDown = false;
+	UpKeyDown = false;
+	DownKeyDown = false;
+	VelocityIncrementKeyDown = false;
+	VelocityDecrementKeyDown = false;
+}
+
+void Tank::FireCannonBall(CannonBallType cannonBallType)
+{
+	m_CannonBall->SetCurrentType(cannonBallType);
+
 	if(m_Wind)
 		m_CannonBall->FireProjectile(m_Velocity + m_Wind->GetWindVelocity(Transform.Flipped), m_Muzzle->Transform.Rotation);
 	else
@@ -300,15 +334,27 @@ void Tank::FireKeyAction()
 	//OnDepossess();
 }
 
-void Tank::FlushKeyPresses()
+void Tank::FireLightBall()
 {
-	LeftKeyDown = false;
-	RightKeyDown = false;
-	UpKeyDown = false;
-	DownKeyDown = false;
-	VelocityIncrementKeyDown = false;
-	VelocityDecrementKeyDown = false;
-	FireKeyDown = false;
+	FireCannonBall(CannonBallType::LIGHT);
+}
+
+void Tank::FireMediumBall()
+{
+	if (m_MediumBallCount > 0u)
+	{
+		m_MediumBallCount--;
+		FireCannonBall(CannonBallType::MEDIUM);
+	}
+}
+
+void Tank::FireHeavyBall()
+{
+	if (m_HeavyBallCount > 0u)
+	{
+		m_HeavyBallCount--;
+		FireCannonBall(CannonBallType::HEAVY);
+	}
 }
 
 void Tank::BoundTranslation()

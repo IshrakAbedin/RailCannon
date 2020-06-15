@@ -110,11 +110,11 @@ void Wind::OnImGuiRender()
 {
 	std::string windVelocityText;
 	if (m_WindVelocity == 0.0f)
-		windVelocityText = "Wind Speed: " + std::to_string(m_WindVelocity);
+		windVelocityText = "Wind Velocity: " + std::to_string(m_WindVelocity);
 	else if (m_WindVelocity < 0.0f)
-		windVelocityText = "Wind Speed: " + std::to_string(glm::abs(m_WindVelocity)) + " L";
+		windVelocityText = "Wind Velocity: " + std::to_string(glm::abs(m_WindVelocity)) + " L";
 	else
-		windVelocityText = "Wind Speed: " + std::to_string(glm::abs(m_WindVelocity)) + " R";
+		windVelocityText = "Wind Velocity: " + std::to_string(glm::abs(m_WindVelocity)) + " R";
 	
 	ImGui::Begin("Wind Gauge");
 	ImGui::Text(windVelocityText.c_str());

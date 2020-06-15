@@ -8,13 +8,14 @@
 #include "imgui/imgui.h"
 
 CannonBall::CannonBall(Transformation& parentTransform, bool collisionOn)
-	:CannonBall::CannonBall(parentTransform, collisionOn, "res/textures/debug/Default.png")
+	:CannonBall::CannonBall(parentTransform, collisionOn, "res/textures/cannon/ball/")
 {
 }
 
-CannonBall::CannonBall(Transformation& parentTransform, bool collisionOn, std::string texturePath)
-	: ProjectileMotion(0.033f, 0.5f), ActiveCollider(collisionOn), 
-	m_ParentTransform(parentTransform), m_TexturePath(texturePath),
+CannonBall::CannonBall(Transformation& parentTransform, bool collisionOn, std::string textureDirectory)
+	: ProjectileMotion(0.033f, 0.5f), ActiveCollider(collisionOn),
+	m_BaseDamage(0.1f), m_TypeWiseDamageMultiplier{1.0f, 2.0f, 3.0f}, m_CurrentType(CannonBallType::LIGHT),
+	m_ParentTransform(parentTransform), m_TextureDirectory(textureDirectory),
 	m_Proj(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f)),
 	m_FlipRotation(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))),
 	m_Model(glm::mat4(1.0f)), m_TopLeftPoint(glm::vec2(-0.5f, 0.5f)), m_BottomRightPoint(glm::vec2(0.5f, -0.5f)),
@@ -54,7 +55,9 @@ CannonBall::CannonBall(Transformation& parentTransform, bool collisionOn, std::s
 
 	m_Shader = std::make_unique<Shader>("res/shaders/Tank.shader");
 	m_Shader->Bind();
-	m_Texture = std::make_unique<Texture>(m_TexturePath);
+	m_TextureLight = std::make_unique<Texture>(m_TextureDirectory + "Ball1.png");
+	m_TextureMedium = std::make_unique<Texture>(m_TextureDirectory + "Ball2.png");
+	m_TextureHeavy = std::make_unique<Texture>(m_TextureDirectory + "Ball3.png");
 	m_Shader->SetUniform1i("u_Texture", 0); // This value must match previous texture binding slot number
 
 	m_Exploder = std::make_unique<Exploder>();
@@ -81,7 +84,7 @@ void CannonBall::OnUpdate(float deltaTime)
 				Damageable* damageable = dynamic_cast<Damageable*>(objectPtr);
 				if (damageable)
 				{
-					damageable->TakeDamage(0.1f);
+					damageable->TakeDamage(m_BaseDamage * m_TypeWiseDamageMultiplier[(int)m_CurrentType]);
 				}
 			}
 			ResetProjectile();
@@ -98,7 +101,12 @@ void CannonBall::OnRender()
 
 	m_Renderer.EnableBlend();
 
-	m_Texture->Bind();
+	if (m_CurrentType == CannonBallType::LIGHT)
+		m_TextureLight->Bind();
+	else if (m_CurrentType == CannonBallType::MEDIUM)
+		m_TextureMedium->Bind();
+	else if (m_CurrentType == CannonBallType::HEAVY)
+		m_TextureHeavy->Bind();
 
 	glm::mat4 identity(1.0f);
 	glm::mat4 rotation = glm::rotate(identity, glm::radians(Transform.Rotation + m_ParentTransform.Rotation), glm::vec3(0, 0, 1));
