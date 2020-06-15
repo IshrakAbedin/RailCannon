@@ -42,6 +42,9 @@ public:
 	inline float GetRotationMax() const { return m_RotationMax; }
 	inline void SetRotationMax(float rotationMax) { m_RotationMax = rotationMax; }
 
+	inline void SetRotationToMin() { Transform.Rotation = m_RotationMin; }
+	inline void SetRotationToMax() { Transform.Rotation = m_RotationMax; }
+
 	void IncrementRotation(float amount);
 	void DecrementRotation(float amount);
 };

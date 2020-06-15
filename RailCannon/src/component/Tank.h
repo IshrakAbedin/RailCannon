@@ -21,6 +21,8 @@ private:
 	float m_LeftBoundary;
 	float m_RightBoundary;
 	float m_MovementRate;
+	float m_RotationRate;
+	float m_Velocity;
 	float m_VelocityMin;
 	float m_VelocityMax;
 	float m_VelocityDelta;
@@ -50,9 +52,6 @@ private:
 	glm::mat4 m_Model;
 	glm::mat4 m_FlipRotation;
 
-	float m_RotationRate;
-	float m_Velocity;
-
 	Renderer m_Renderer;
 
 public:
@@ -73,6 +72,13 @@ public:
 	inline float GetMovementRate() const { return m_MovementRate; }
 	inline void SetMovementRate(const float movementRate) { m_MovementRate = movementRate; }
 
+	inline float GetVelocity() const { return m_Velocity; }
+	inline void SetVelocity(const float velocity) { m_Velocity = velocity; }
+
+	inline float GetMuzzleRotation() const { return m_Muzzle->Transform.Rotation; }
+	inline void SetMuzzleRotationToMin() { m_Muzzle->SetRotationToMin(); }
+	inline void SetMuzzleRotationToMax() { m_Muzzle->SetRotationToMax(); }
+
 	inline unsigned int GetMediumBallCount() const { return m_MediumBallCount; }
 	inline void SetMediumBallCount(const unsigned int mediumBallCount) { m_MediumBallCount = mediumBallCount; }
 
@@ -83,6 +89,8 @@ public:
 	inline void SetIdentifier(const std::string& identifier) { m_Identifier = identifier; }
 
 	inline void SetWind(Wind* wind) { m_Wind = wind; }
+
+	inline void ResetCannonBall() { m_CannonBall->ResetProjectile(); }
 
 	void OnUpdate(float deltaTime) override;
 	void OnRender() override;

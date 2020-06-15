@@ -102,7 +102,10 @@
     <ClCompile Include="src\component\BlockingArea.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Application.cpp">
+    <ClCompile Include="src\scene\GameScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ApplicationDebug2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1056,6 +1059,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\component\BlockingArea.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\GameScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -125,7 +125,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\ApplicationDebug2.cpp" />
     <ClCompile Include="src\component\Background.cpp" />
     <ClCompile Include="src\component\BlockingArea.cpp" />
     <ClCompile Include="src\component\CannonBall.cpp" />
@@ -141,6 +141,7 @@
     <ClCompile Include="src\debug\Rectangle.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\scene\GameScene.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\test\Test.cpp" />
     <ClCompile Include="src\test\TestClearColor.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="src\debug\Rectangle.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\scene\GameScene.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\test\Test.h" />
     <ClInclude Include="src\test\TestClearColor.h" />

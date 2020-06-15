@@ -9,34 +9,15 @@
 
 #include "Renderer.h"
 
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
-#include "Texture.h"
-
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#include "component/Tank.h"
-#include "component/Background.h"
-#include "component/Wind.h"
-#include "component/BlockingArea.h"
+#include "scene/GameScene.h"
 
-void SetTankAActive();
-void SetTankBActive();
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-Tank* CurrentTank;
-Tank* TankA;
-Tank* TankB;
-Wind* WindGen;
+GameScene* GScene;
 
 int main(void)
 {
@@ -69,8 +50,6 @@ int main(void)
 	}
 
 	{
-
-
 		// ImGui declaration
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -79,75 +58,11 @@ int main(void)
 		ImGui_ImplOpenGL3_Init(glsl_version);
 		ImGui::StyleColorsLight();
 
-		//test::Test* currentTest = nullptr;
-		//test::TestMenu* testMenu = new test::TestMenu(currentTest);
-		//currentTest = testMenu; // A command line argument can be setup so that the application boots up with a specific test
-
-		//testMenu->RegisterTest<test::TestClearColor>("Clear color");
-		//testMenu->RegisterTest<test::TestTexture2D>("2D Texture");
-
 		glfwSetKeyCallback(window, KeyCallback);
 
 		Renderer renderer;
 		
-		Background bg;
-
-		BlockingArea B1("BA1");
-		BlockingArea B2("BA2");
-		BlockingArea B3("BA3");
-
-		B1.Transform.Translation.y = -9.0f;
-		B1.Transform.Scale.x = 32.0f;
-		B1.Transform.Scale.y = 2.0f;
-
-		B2.Transform.Translation.x = 16.0f;
-		B2.Transform.Scale.x = 2.0f;
-		B2.Transform.Scale.y = 36.0f;
-
-		B3.Transform.Translation.x = -16.0f;
-		B3.Transform.Scale.x = 2.0f;
-		B3.Transform.Scale.y = 36.0f;
-
-		WindGen = new Wind(0.2f);
-
-		TankA = new Tank(1.0f, false, "Player 1", "res/textures/cannon/", WindGen);
-		TankB = new Tank(1.0f, true, "Player 2", "res/textures/cannon/", WindGen);
-
-		TankA->Transform.Scale = glm::vec3(2.0f);
-		TankB->Transform.Scale = glm::vec3(2.0f);
-
-		TankA->Transform.Translation.x = -12.0f;
-		TankA->Transform.Translation.y = -3.4f;
-
-		TankB->Transform.Translation.x = 12.0f;
-		TankB->Transform.Translation.y = -3.4f;
-
-		TankA->SetLeftBoundary(-13.76f);
-		TankA->SetRightBoundary(-5.98f);
-
-		TankB->SetLeftBoundary(5.98f);
-		TankB->SetRightBoundary(13.76f);
-
-		TankA->RegisterCannonBallCollidable(TankB);
-		TankA->RegisterCannonBallCollidable(&B1);
-		TankA->RegisterCannonBallCollidable(&B2);
-		TankA->RegisterCannonBallCollidable(&B3);
-
-		TankB->RegisterCannonBallCollidable(TankA);
-		TankB->RegisterCannonBallCollidable(&B1);
-		TankB->RegisterCannonBallCollidable(&B2);
-		TankB->RegisterCannonBallCollidable(&B3);
-
-		//TankA->OnPossessCallback = SetTankAActive;
-		//TankB->OnPossessCallback = SetTankBActive;
-		TankA->OnDepossessCallback = SetTankBActive;
-		TankB->OnDepossessCallback = SetTankAActive;
-		
-		TankA->IsControllerOn = true;
-		TankB->IsControllerOn = false;
-
-		SetTankAActive();
-		TankA->OnPossess();
+		GScene = new GameScene();
 
 		while (!glfwWindowShouldClose(window))
 		{
@@ -177,29 +92,14 @@ int main(void)
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 
-			bg.OnUpdate(0.0f);
-			bg.OnRender();
+			ImGui::Begin("Menu");
+			if (ImGui::Button("Restart"))
+				GScene->InitializeStats();
+			ImGui::End();
 
-			WindGen->OnUpdate(0.0f);
-			WindGen->OnRender();
-			WindGen->OnImGuiRender();
-
-			B1.OnUpdate(0.0f);
-			B1.OnRender();
-
-			B2.OnUpdate(0.0f);
-			B2.OnRender();
-
-			B3.OnUpdate(0.0f);
-			B3.OnRender();
-
-			TankA->OnUpdate(0.0f);
-			TankA->OnRender();
-			TankA->OnImGuiRender();
-
-			TankB->OnUpdate(0.0f);
-			TankB->OnRender();
-			TankB->OnImGuiRender();
+			GScene->OnUpdate(0.0f);
+			GScene->OnRender();
+			GScene->OnImGuiRender();
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -209,9 +109,7 @@ int main(void)
 			glfwPollEvents();
 		}
 
-		delete TankA;
-		delete TankB;
-		delete WindGen;
+		delete GScene;
 
 		//delete currentTest; // Delete the current test on window close
 		//if (currentTest != testMenu) // If we closed the window which inside any test, testMenu is still left, so we should clear that too
@@ -226,22 +124,8 @@ int main(void)
 	return 0;
 }
 
-void SetTankAActive()
-{
-	WindGen->ShuffleWindVelocity();
-	CurrentTank = TankA;
-	TankA->OnPossess();
-}
-
-void SetTankBActive()
-{
-	WindGen->ShuffleWindVelocity();
-	CurrentTank = TankB;
-	TankB->OnPossess();
-}
-
 void KeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
 {
-	if (CurrentTank)
-		CurrentTank->KeyCallbackRedirect(key, scancode, action, mods);
+	if (GScene)
+		GScene->KeyCallbackRedirect(key, scancode, action, mods);
 }
