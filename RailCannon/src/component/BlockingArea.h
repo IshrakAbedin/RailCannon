@@ -4,17 +4,15 @@
 #include <memory>
 
 #include "Renderer.h"
-#include "Texture.h"
-#include "component/Drawable.h"
-#include "component/SimpleCollision2D.h"
+#include "Drawable.h"
+#include "SimpleCollision2D.h"
 
-class Rectangle : public Drawable, public ActiveCollider
+class BlockingArea : public Drawable, public PassiveCollider
 {
 public:
 	Transformation Transform;
 private:
 	std::string m_Identifier;
-	std::string m_TexturePath;
 
 	glm::vec2 m_TopLeftPoint;
 	glm::vec2 m_BottomRightPoint;
@@ -23,18 +21,15 @@ private:
 	std::unique_ptr<VertexBuffer> m_VertexBuffer;
 	std::unique_ptr<IndexBuffer> m_IndexBuffer;
 	std::unique_ptr<Shader> m_Shader;
-	std::unique_ptr<Texture> m_Texture;
 
 	glm::mat4 m_Proj; // Camera is discarded
 	glm::mat4 m_Model;
-	glm::mat4 m_FlipRotation;
 
 	Renderer m_Renderer;
 
 public:
-	Rectangle(bool flipped, std::string identifier, bool collisionOn);
-	Rectangle(bool flipped, std::string identifier, bool collisionOn, std::string texturePath);
-	~Rectangle();
+	BlockingArea(std::string identifier);
+	~BlockingArea();
 
 	inline std::string GetIdentifier() const { return m_Identifier; }
 	inline void SetIdentifier(const std::string& identifier) { m_Identifier = identifier; }

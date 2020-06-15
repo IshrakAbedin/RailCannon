@@ -59,11 +59,11 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
-	if (glewInit() != GLEW_OK)
+	if (glewInit() != GLEW_OK) 
 	{
 		std::cout << "Error in glew" << std::endl;
 	}
-	else
+	else 
 	{
 		std::cout << "Using OpenGL" << GetGLVersion() << std::endl;
 	}
@@ -89,7 +89,7 @@ int main(void)
 		glfwSetKeyCallback(window, KeyCallback);
 
 		Renderer renderer;
-
+		
 		Background bg;
 
 		BlockingArea B1("BA1");
@@ -142,7 +142,7 @@ int main(void)
 		//TankB->OnPossessCallback = SetTankBActive;
 		TankA->OnDepossessCallback = SetTankBActive;
 		TankB->OnDepossessCallback = SetTankAActive;
-
+		
 		TankA->IsControllerOn = true;
 		TankB->IsControllerOn = false;
 
@@ -216,7 +216,7 @@ int main(void)
 		//delete currentTest; // Delete the current test on window close
 		//if (currentTest != testMenu) // If we closed the window which inside any test, testMenu is still left, so we should clear that too
 		//	delete testMenu;
-	}
+	} 
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();

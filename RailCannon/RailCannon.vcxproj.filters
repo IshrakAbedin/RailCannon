@@ -87,9 +87,6 @@
     <ClCompile Include="src\component\CannonBall.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\component\Background.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -100,6 +97,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\component\Exploder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\component\BlockingArea.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1052,6 +1055,9 @@
     <ClInclude Include="src\component\Exploder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\component\BlockingArea.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\vendor\glm\detail\func_common.inl">
@@ -1467,5 +1473,6 @@
     <None Include="res\shaders\Smoke.shader" />
     <None Include="res\shaders\Wind.shader" />
     <None Include="res\shaders\Explosion.shader" />
+    <None Include="res\shaders\FlatColor.shader" />
   </ItemGroup>
 </Project>
