@@ -25,7 +25,11 @@ std::string GetGLVersion();
 class Renderer
 {
 public:
+	void SetClearColor(float v0, float v1, float v2, float v3) const;
 	void Clear() const;
 	void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
 	void EnableBlend() const;
+
+	inline void SetClearColorBlack() const { SetClearColor(0.0f, 0.0f, 0.0f, 1.0f); }
+	inline void SetClearColorWhite() const { SetClearColor(1.0f, 1.0f, 1.0f, 1.0f); }
 };

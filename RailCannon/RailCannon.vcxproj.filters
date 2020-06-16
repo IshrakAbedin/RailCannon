@@ -108,6 +108,9 @@
     <ClCompile Include="src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\rcutil\Saver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\test\Test.h">
@@ -1062,6 +1065,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\GameScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\nlohmann\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rcutil\Saver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -11,6 +11,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "scene/GameScene.h"
+#include "rcutil/Saver.h"
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -21,6 +22,13 @@ int main(void)
 	bool aboutWindowOpened = false;
 	bool controlsWindowOpened = false;
 	bool statsWindowOpened = false;
+	bool settingsWindowOpened = false;
+	
+	int settingsIndex;
+	bool settingsFullscreen;
+
+	Saver saver("./save/settings.json");
+	saver.Load();
 
 	GLFWwindow* window;
 
@@ -33,7 +41,13 @@ int main(void)
 
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	window = glfwCreateWindow(1920, 1080, "RailCannon", glfwGetPrimaryMonitor(), NULL);
+	int width = saver.GetSavedWidth();
+	int height = saver.GetSavedHeight();
+	bool fullscreen = saver.GetFullscreen();
+	settingsFullscreen = fullscreen;
+	settingsIndex = saver.GetSavedIndex();
+
+	window = glfwCreateWindow(width, height, "RailCannon", fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -69,7 +83,7 @@ int main(void)
 
 		while (!glfwWindowShouldClose(window))
 		{
-			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+			renderer.SetClearColorBlack();
 			renderer.Clear();
 
 			ImGui_ImplOpenGL3_NewFrame();
@@ -96,6 +110,11 @@ int main(void)
 					aboutWindowOpened = aboutWindowOpened ? false : true;
 				}
 				ImGui::SameLine();
+				if (ImGui::Button("Settings"))
+				{
+					settingsWindowOpened = settingsWindowOpened ? false : true;
+				}
+				ImGui::SameLine();
 				if (ImGui::Button("Exit"))
 					glfwSetWindowShouldClose(window, GLFW_TRUE);
 				ImGui::End();
@@ -112,6 +131,7 @@ int main(void)
 					ImGui::BulletText("GLM 0.9.9.8");
 					ImGui::BulletText("Dear ImGui 1.76");
 					ImGui::BulletText("stb_image");
+					ImGui::BulletText("nlohmann::json");
 					ImGui::EndChild();
 
 					ImGui::End();
@@ -135,6 +155,28 @@ int main(void)
 					ImGui::BulletText("Maximum wind velocity is 0.2 at any direction");
 					ImGui::EndChild();
 
+					ImGui::End();
+				}
+
+				if (settingsWindowOpened) // GUI code
+				{
+					ImGui::SetNextWindowSizeConstraints(ImVec2(-1, -1), ImVec2(-1, -1));
+					ImGui::Begin("Settings", &settingsWindowOpened);
+
+					ImGui::SliderInt("Resolution", &settingsIndex, 0, 3);
+					ImGui::Text("Selected Resolution: %d x %d", saver.GetWidthBasedOnIndex(settingsIndex), saver.GetHeightBasedOnIndex(settingsIndex));
+
+					ImGui::Checkbox("Fullscreen", &settingsFullscreen);
+
+					if (ImGui::Button("Save"))
+						saver.Save(settingsIndex, settingsFullscreen);
+
+					ImGui::Text("Saved Settings: %d x %d %s", 
+						saver.GetSavedWidth(), saver.GetSavedHeight(), saver.GetFullscreen() ? "Fullscreen" : "Windowed");
+
+					ImGui::TextColored(ImVec4(0.9f, 0.0f, 0.0f, 1.0f), "Restart is required to apply new settings.");
+					ImGui::TextColored(ImVec4(0.9f, 0.0f, 0.0f, 1.0f), "Please reposition HUDs accordingly.");
+					ImGui::TextColored(ImVec4(0.9f, 0.0f, 0.0f, 1.0f), "Some HUDs can be resized too.");
 					ImGui::End();
 				}
 
