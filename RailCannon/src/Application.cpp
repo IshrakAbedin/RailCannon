@@ -3,53 +3,37 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
 
 #include "Renderer.h"
-
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
-#include "Texture.h"
-
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#include "component/Tank.h"
-#include "component/Background.h"
-#include "component/Wind.h"
-#include "component/BlockingArea.h"
+#include "scene/GameScene.h"
 
-void SetTankAActive();
-void SetTankBActive();
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-Tank* CurrentTank;
-Tank* TankA;
-Tank* TankB;
-Wind* WindGen;
+GameScene* GScene;
 
 int main(void)
 {
+	bool aboutWindowOpened = false;
+	bool controlsWindowOpened = false;
+	bool statsWindowOpened = false;
+
 	GLFWwindow* window;
 
 	if (!glfwInit())
 		return -1;
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(1600, 900, "RailCannon", NULL, NULL);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+	window = glfwCreateWindow(1920, 1080, "RailCannon", glfwGetPrimaryMonitor(), NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -69,8 +53,6 @@ int main(void)
 	}
 
 	{
-
-
 		// ImGui declaration
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -79,75 +61,11 @@ int main(void)
 		ImGui_ImplOpenGL3_Init(glsl_version);
 		ImGui::StyleColorsLight();
 
-		//test::Test* currentTest = nullptr;
-		//test::TestMenu* testMenu = new test::TestMenu(currentTest);
-		//currentTest = testMenu; // A command line argument can be setup so that the application boots up with a specific test
-
-		//testMenu->RegisterTest<test::TestClearColor>("Clear color");
-		//testMenu->RegisterTest<test::TestTexture2D>("2D Texture");
-
 		glfwSetKeyCallback(window, KeyCallback);
 
 		Renderer renderer;
 
-		Background bg;
-
-		BlockingArea B1("BA1");
-		BlockingArea B2("BA2");
-		BlockingArea B3("BA3");
-
-		B1.Transform.Translation.y = -9.0f;
-		B1.Transform.Scale.x = 32.0f;
-		B1.Transform.Scale.y = 2.0f;
-
-		B2.Transform.Translation.x = 16.0f;
-		B2.Transform.Scale.x = 2.0f;
-		B2.Transform.Scale.y = 36.0f;
-
-		B3.Transform.Translation.x = -16.0f;
-		B3.Transform.Scale.x = 2.0f;
-		B3.Transform.Scale.y = 36.0f;
-
-		WindGen = new Wind(0.2f);
-
-		TankA = new Tank(1.0f, false, "Player 1", "res/textures/cannon/", WindGen);
-		TankB = new Tank(1.0f, true, "Player 2", "res/textures/cannon/", WindGen);
-
-		TankA->Transform.Scale = glm::vec3(2.0f);
-		TankB->Transform.Scale = glm::vec3(2.0f);
-
-		TankA->Transform.Translation.x = -12.0f;
-		TankA->Transform.Translation.y = -3.4f;
-
-		TankB->Transform.Translation.x = 12.0f;
-		TankB->Transform.Translation.y = -3.4f;
-
-		TankA->SetLeftBoundary(-13.76f);
-		TankA->SetRightBoundary(-5.98f);
-
-		TankB->SetLeftBoundary(5.98f);
-		TankB->SetRightBoundary(13.76f);
-
-		TankA->RegisterCannonBallCollidable(TankB);
-		TankA->RegisterCannonBallCollidable(&B1);
-		TankA->RegisterCannonBallCollidable(&B2);
-		TankA->RegisterCannonBallCollidable(&B3);
-
-		TankB->RegisterCannonBallCollidable(TankA);
-		TankB->RegisterCannonBallCollidable(&B1);
-		TankB->RegisterCannonBallCollidable(&B2);
-		TankB->RegisterCannonBallCollidable(&B3);
-
-		//TankA->OnPossessCallback = SetTankAActive;
-		//TankB->OnPossessCallback = SetTankBActive;
-		TankA->OnDepossessCallback = SetTankBActive;
-		TankB->OnDepossessCallback = SetTankAActive;
-
-		TankA->IsControllerOn = true;
-		TankB->IsControllerOn = false;
-
-		SetTankAActive();
-		TankA->OnPossess();
+		GScene = new GameScene();
 
 		while (!glfwWindowShouldClose(window))
 		{
@@ -158,48 +76,106 @@ int main(void)
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-			// Insert code here
-			//if (currentTest)
-			//{
-			//	currentTest->OnUpdate(0.0f);
-			//	currentTest->OnRender();
-			//	ImGui::Begin("Test");
-			//	if (currentTest != testMenu && ImGui::Button("<-")) // We can nest if it, but && is fine
-			//	{
-			//		delete currentTest; // Delete the current test
-			//		currentTest = testMenu; // Set current test back to testMenu
-			//	}
-			//	currentTest->OnImGuiRender();
-			//	ImGui::End();
-			//}
-
 			ImGui::Begin("FPS");
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 
-			bg.OnUpdate(0.0f);
-			bg.OnRender();
+			if (GScene->GetStatus() == GameStatus::ONGOING) // Game has not ended
+			{
+				ImGui::Begin("Menu");
+				if (ImGui::Button("Restart"))
+					GScene->InitializeStats();
+				ImGui::SameLine();
+				if (ImGui::Button("Controls"))
+				{
+					controlsWindowOpened = controlsWindowOpened ? false : true;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("About"))
+				{
+					aboutWindowOpened = aboutWindowOpened ? false : true;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Exit"))
+					glfwSetWindowShouldClose(window, GLFW_TRUE);
+				ImGui::End();
 
-			WindGen->OnUpdate(0.0f);
-			WindGen->OnRender();
-			WindGen->OnImGuiRender();
+				if (aboutWindowOpened) // GUI Code
+				{
+					ImGui::Begin("About", &aboutWindowOpened);
+					ImGui::Text("Built by Mohammad Ishrak Abedin.");
+					ImGui::Text("Libraries used: ");
 
-			B1.OnUpdate(0.0f);
-			B1.OnRender();
+					ImGui::BeginChild("Libraries");
+					ImGui::BulletText("GLFW 3.3.2");
+					ImGui::BulletText("GLEW 2.1");
+					ImGui::BulletText("GLM 0.9.9.8");
+					ImGui::BulletText("Dear ImGui 1.76");
+					ImGui::BulletText("stb_image");
+					ImGui::EndChild();
 
-			B2.OnUpdate(0.0f);
-			B2.OnRender();
+					ImGui::End();
+				}
 
-			B3.OnUpdate(0.0f);
-			B3.OnRender();
+				if (controlsWindowOpened) // GUI code
+				{
+					ImGui::Begin("Controls", &controlsWindowOpened);
+					ImGui::Text("Controls: ");
 
-			TankA->OnUpdate(0.0f);
-			TankA->OnRender();
-			TankA->OnImGuiRender();
+					ImGui::BeginChild("Controls");
+					ImGui::BulletText("Move Left: Left Arrow or A");
+					ImGui::BulletText("Move Right: Right Arrow or D");
+					ImGui::BulletText("Raise Muzzle: Up Arrow or W");
+					ImGui::BulletText("Lower Muzzle: Down Arrow or S");
+					ImGui::BulletText("Increase Power: Keypad 5 or E");
+					ImGui::BulletText("Decrease Power: Keypad 4 or Q");
+					ImGui::BulletText("Fire AP Projectile: Keypad 1 or 1 or Space (Unlimited)");
+					ImGui::BulletText("Fire HE Projectile: Keypad 2 or 2 (Ammo is limited to 2)");
+					ImGui::BulletText("Fire APHE Projectile: Keypad 3 or 3 (Ammo is limited to 1)");
+					ImGui::BulletText("Maximum wind velocity is 0.2 at any direction");
+					ImGui::EndChild();
 
-			TankB->OnUpdate(0.0f);
-			TankB->OnRender();
-			TankB->OnImGuiRender();
+					ImGui::End();
+				}
+
+				GScene->OnUpdate(0.0f);
+				GScene->OnRender();
+				GScene->OnImGuiRender();
+			}
+			else // Game ended
+			{
+				ImGui::SetNextWindowSizeConstraints(ImVec2(-1, -1), ImVec2(-1, -1));
+				ImGui::Begin("Conclusion");
+				ImGui::TextColored(ImVec4(0.9f, 0.0f, 0.0f, 1.0f), "PLAYER %d IS VICTORIOUS", (int)GScene->GetStatus());
+				if (ImGui::Button("Rematch"))
+					GScene->InitializeStats();
+				ImGui::SameLine();
+				if (ImGui::Button("Stats"))
+				{
+					statsWindowOpened = statsWindowOpened ? false : true;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Exit"))
+					glfwSetWindowShouldClose(window, GLFW_TRUE);
+				ImGui::End();
+
+				if (statsWindowOpened) // GUI code
+				{
+					ImGui::Begin("Status of the Game", &statsWindowOpened);
+					ImGui::Text("Player ONE:");
+					ImGui::BulletText("HP Remaining: %.0f", 100.0f * GScene->GetTankA()->GetHp());
+					ImGui::BulletText("HE Remaining: %d", GScene->GetTankA()->GetMediumBallCount());
+					ImGui::BulletText("APHE Remaining: %d", GScene->GetTankA()->GetHeavyBallCount());
+					ImGui::Text("Player TWO:");
+					ImGui::BulletText("HP Remaining: %.0f", 100.0f * GScene->GetTankB()->GetHp());
+					ImGui::BulletText("HE Remaining: %d", GScene->GetTankB()->GetMediumBallCount());
+					ImGui::BulletText("APHE Remaining: %d", GScene->GetTankB()->GetHeavyBallCount());
+					ImGui::End();
+				}
+
+				GScene->OnUpdate(0.0f);
+				GScene->OnRender();
+			}
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -209,13 +185,7 @@ int main(void)
 			glfwPollEvents();
 		}
 
-		delete TankA;
-		delete TankB;
-		delete WindGen;
-
-		//delete currentTest; // Delete the current test on window close
-		//if (currentTest != testMenu) // If we closed the window which inside any test, testMenu is still left, so we should clear that too
-		//	delete testMenu;
+		delete GScene;
 	}
 
 	ImGui_ImplOpenGL3_Shutdown();
@@ -226,22 +196,8 @@ int main(void)
 	return 0;
 }
 
-void SetTankAActive()
-{
-	WindGen->ShuffleWindVelocity();
-	CurrentTank = TankA;
-	TankA->OnPossess();
-}
-
-void SetTankBActive()
-{
-	WindGen->ShuffleWindVelocity();
-	CurrentTank = TankB;
-	TankB->OnPossess();
-}
-
 void KeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
 {
-	if (CurrentTank)
-		CurrentTank->KeyCallbackRedirect(key, scancode, action, mods);
+	if (GScene)
+		GScene->KeyCallbackRedirect(key, scancode, action, mods);
 }

@@ -1,145 +1,171 @@
 #include "GameScene.h"
 
 GameScene::GameScene()
+	:m_Status(GameStatus::ONGOING)
 {
-	BG = new Background();
-	B1 = new BlockingArea("BA1");
-	B2 = new BlockingArea("BA2");
-	B3 = new BlockingArea("BA3");
+	m_BG = new Background();
+	m_B1 = new BlockingArea("BA1");
+	m_B2 = new BlockingArea("BA2");
+	m_B3 = new BlockingArea("BA3");
 
-	B1->Transform.Translation.y = -9.0f;
-	B1->Transform.Scale.x = 32.0f;
-	B1->Transform.Scale.y = 2.0f;
+	m_B1->Transform.Translation.y = -9.0f;
+	m_B1->Transform.Scale.x = 32.0f;
+	m_B1->Transform.Scale.y = 2.0f;
 
-	B2->Transform.Translation.x = 16.0f;
-	B2->Transform.Scale.x = 2.0f;
-	B2->Transform.Scale.y = 36.0f;
+	m_B2->Transform.Translation.x = 16.0f;
+	m_B2->Transform.Scale.x = 2.0f;
+	m_B2->Transform.Scale.y = 36.0f;
 
-	B3->Transform.Translation.x = -16.0f;
-	B3->Transform.Scale.x = 2.0f;
-	B3->Transform.Scale.y = 36.0f;
+	m_B3->Transform.Translation.x = -16.0f;
+	m_B3->Transform.Scale.x = 2.0f;
+	m_B3->Transform.Scale.y = 36.0f;
 
-	WindGen = WindGen = new Wind(0.2f);
+	m_WindGen = m_WindGen = new Wind(0.2f);
 
-	TankA = new Tank(1.0f, false, "Player 1", "res/textures/cannon/", WindGen);
-	TankB = new Tank(1.0f, true, "Player 2", "res/textures/cannon/", WindGen);
+	m_TankA = new Tank(1.0f, false, "Player 1", "res/textures/cannon/", m_WindGen);
+	m_TankB = new Tank(1.0f, true, "Player 2", "res/textures/cannon/", m_WindGen);
 
 
-	TankA->Transform.Scale = glm::vec3(2.0f);
-	TankB->Transform.Scale = glm::vec3(2.0f);
+	m_TankA->Transform.Scale = glm::vec3(2.0f);
+	m_TankB->Transform.Scale = glm::vec3(2.0f);
 
-	TankA->Transform.Translation.x = -12.0f;
-	TankA->Transform.Translation.y = -3.4f;
+	m_TankA->Transform.Translation.x = -12.0f;
+	m_TankA->Transform.Translation.y = -3.4f;
 
-	TankB->Transform.Translation.x = 12.0f;
-	TankB->Transform.Translation.y = -3.4f;
+	m_TankB->Transform.Translation.x = 12.0f;
+	m_TankB->Transform.Translation.y = -3.4f;
 
-	TankA->SetLeftBoundary(-13.76f);
-	TankA->SetRightBoundary(-5.98f);
+	m_TankA->SetLeftBoundary(-13.76f);
+	m_TankA->SetRightBoundary(-5.98f);
 
-	TankB->SetLeftBoundary(5.98f);
-	TankB->SetRightBoundary(13.76f);
+	m_TankB->SetLeftBoundary(5.98f);
+	m_TankB->SetRightBoundary(13.76f);
 
-	TankA->RegisterCannonBallCollidable(TankB);
-	TankA->RegisterCannonBallCollidable(B1);
-	TankA->RegisterCannonBallCollidable(B2);
-	TankA->RegisterCannonBallCollidable(B3);
+	m_TankA->RegisterCannonBallCollidable(m_TankB);
+	m_TankA->RegisterCannonBallCollidable(m_B1);
+	m_TankA->RegisterCannonBallCollidable(m_B2);
+	m_TankA->RegisterCannonBallCollidable(m_B3);
 
-	TankB->RegisterCannonBallCollidable(TankA);
-	TankB->RegisterCannonBallCollidable(B1);
-	TankB->RegisterCannonBallCollidable(B2);
-	TankB->RegisterCannonBallCollidable(B3);
+	m_TankB->RegisterCannonBallCollidable(m_TankA);
+	m_TankB->RegisterCannonBallCollidable(m_B1);
+	m_TankB->RegisterCannonBallCollidable(m_B2);
+	m_TankB->RegisterCannonBallCollidable(m_B3);
 
-	TankA->OnDepossessCallback = [&]() {SetTankActive(TankB); };
-	TankB->OnDepossessCallback = [&]() {SetTankActive(TankA); };
+	m_TankA->OnDepossessCallback = [&]() {SetTankActive(m_TankB); };
+	m_TankB->OnDepossessCallback = [&]() {SetTankActive(m_TankA); };
 
 	// Game start conditions
-	TankA->IsControllerOn = true;
-	TankB->IsControllerOn = false;
+	m_TankA->IsControllerOn = true;
+	m_TankB->IsControllerOn = false;
 
-	SetTankActive(TankA);
+	SetTankActive(m_TankA);
 	//TankA->OnPossess();
 }
 
 GameScene::~GameScene()
 {
-	delete BG;
-	delete B1;
-	delete B2;
-	delete B3;
-	delete WindGen;
-	delete TankA;
-	delete TankB;
+	delete m_BG;
+	delete m_B1;
+	delete m_B2;
+	delete m_B3;
+	delete m_WindGen;
+	delete m_TankA;
+	delete m_TankB;
 }
 
 void GameScene::OnUpdate(float timeStep)
 {
-	BG->OnUpdate(timeStep);
-	WindGen->OnUpdate(timeStep);
-	B1->OnUpdate(timeStep);
-	B2->OnUpdate(timeStep);
-	B3->OnUpdate(timeStep);
-	TankA->OnUpdate(timeStep);
-	TankB->OnUpdate(timeStep);
+	m_BG->OnUpdate(timeStep);
+	m_WindGen->OnUpdate(timeStep);
+	m_B1->OnUpdate(timeStep);
+	m_B2->OnUpdate(timeStep);
+	m_B3->OnUpdate(timeStep);
+	m_TankA->OnUpdate(timeStep);
+	m_TankB->OnUpdate(timeStep);
+
+	UpdateStatus();
 }
 
 void GameScene::OnRender()
 {
-	BG->OnRender();
-	WindGen->OnRender();
-	B1->OnRender();
-	B2->OnRender();
-	B3->OnRender();
-	TankA->OnRender();
-	TankB->OnRender();
+	m_BG->OnRender();
+	m_WindGen->OnRender();
+	m_B1->OnRender();
+	m_B2->OnRender();
+	m_B3->OnRender();
+	m_TankA->OnRender();
+	m_TankB->OnRender();
 }
 
 void GameScene::OnImGuiRender()
 {
-	WindGen->OnImGuiRender();
-	TankA->OnImGuiRender();
-	TankB->OnImGuiRender();
+	m_WindGen->OnImGuiRender();
+	m_TankA->OnImGuiRender();
+	m_TankB->OnImGuiRender();
 }
 
 void GameScene::InitializeStats()
 {
-	TankA->SetHp(1.0f);
-	TankA->SetMuzzleRotationToMin();
-	TankA->SetVelocity(0.5f);
-	TankA->SetMediumBallCount(2);
-	TankA->SetHeavyBallCount(1);
-	TankA->Transform.Translation.x = -12.0f;
-	TankA->Transform.Translation.y = -3.4f;
+	m_Status = GameStatus::ONGOING;
 
-	TankB->SetHp(1.0f);
-	TankB->SetMuzzleRotationToMin();
-	TankB->SetVelocity(0.5f);
-	TankB->SetMediumBallCount(2);
-	TankB->SetHeavyBallCount(1);
-	TankB->Transform.Translation.x = 12.0f;
-	TankB->Transform.Translation.y = -3.4f;
+	m_TankA->SetHp(1.0f);
+	m_TankA->SetMuzzleRotationToMin();
+	m_TankA->SetVelocity(0.5f);
+	m_TankA->SetMediumBallCount(2);
+	m_TankA->SetHeavyBallCount(1);
+	m_TankA->Transform.Translation.x = -12.0f;
+	m_TankA->Transform.Translation.y = -3.4f;
 
-	if (CurrentTank == TankB) 
+	m_TankB->SetHp(1.0f);
+	m_TankB->SetMuzzleRotationToMin();
+	m_TankB->SetVelocity(0.5f);
+	m_TankB->SetMediumBallCount(2);
+	m_TankB->SetHeavyBallCount(1);
+	m_TankB->Transform.Translation.x = 12.0f;
+	m_TankB->Transform.Translation.y = -3.4f;
+
+	if (m_CurrentTank == m_TankB) 
 	{
-		TankB->ResetCannonBall();
-		TankB->OnDepossess();
+		m_TankB->ResetCannonBall();
+		m_TankB->OnDepossess();
 	}
-	else if (CurrentTank == TankA)
+	else if (m_CurrentTank == m_TankA)
 	{
-		TankA->ResetCannonBall();
-		SetTankActive(TankA);
+		m_TankA->ResetCannonBall();
+		SetTankActive(m_TankA);
+	}
+	else if(m_CurrentTank == nullptr)
+	{
+		m_TankA->IsControllerOn = true;
+		m_TankB->IsControllerOn = false;
+
+		SetTankActive(m_TankA);
 	}
 }
 
 void GameScene::SetTankActive(Tank * tank)
 {
-	WindGen->ShuffleWindVelocity();
-	CurrentTank = tank;
+	m_WindGen->ShuffleWindVelocity();
+	m_CurrentTank = tank;
 	tank->OnPossess();
 }
 
 void GameScene::KeyCallbackRedirect(int key, int scancode, int action, int mods)
 {
-	if (CurrentTank)
-		CurrentTank->KeyCallbackRedirect(key, scancode, action, mods);
+	if (m_CurrentTank)
+		m_CurrentTank->KeyCallbackRedirect(key, scancode, action, mods);
+}
+
+void GameScene::UpdateStatus()
+{
+	if (m_TankA->GetHp() <= 0.001f) // Floating point comparsion problems
+	{
+		m_Status = GameStatus::PLAYER_TWO_HAS_WON;
+		m_CurrentTank = nullptr;
+	}
+	else if (m_TankB->GetHp() <= 0.001f) // Floating point comparsion problems
+	{
+		m_Status = GameStatus::PLAYER_ONE_HAS_WON;
+		m_CurrentTank = nullptr;
+	}
 }
