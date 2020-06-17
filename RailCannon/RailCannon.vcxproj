@@ -159,6 +159,7 @@
     <ClCompile Include="src\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\component\Background.h" />
     <ClInclude Include="src\component\BlockingArea.h" />
     <ClInclude Include="src\component\CannonBall.h" />
@@ -623,6 +624,12 @@
     <None Include="src\vendor\glm\gtx\vector_angle.inl" />
     <None Include="src\vendor\glm\gtx\vector_query.inl" />
     <None Include="src\vendor\glm\gtx\wrap.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RailCannon.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\icon\RailCannonIcon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

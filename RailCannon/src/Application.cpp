@@ -10,6 +10,8 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "stb_image/stb_image.h"
+
 #include "scene/GameScene.h"
 #include "rcutil/Saver.h"
 
@@ -53,6 +55,12 @@ int main(void)
 		glfwTerminate();
 		return -1;
 	}
+
+	// Assign icon
+	GLFWimage icons[1];
+	icons[0].pixels = stbi_load("./res/icon/RailCannonIcon.png", &icons[0].width, &icons[0].height, 0, 4); //rgba channels
+	glfwSetWindowIcon(window, 1, icons);
+	stbi_image_free(icons[0].pixels);
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);

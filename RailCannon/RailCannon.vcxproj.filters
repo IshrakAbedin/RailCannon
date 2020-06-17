@@ -1073,6 +1073,9 @@
     <ClInclude Include="src\rcutil\Saver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\vendor\glm\detail\func_common.inl">
@@ -1489,5 +1492,15 @@
     <None Include="res\shaders\Wind.shader" />
     <None Include="res\shaders\Explosion.shader" />
     <None Include="res\shaders\FlatColor.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RailCannon.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\icon\RailCannonIcon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
